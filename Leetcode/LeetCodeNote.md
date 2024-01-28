@@ -1,5 +1,9 @@
 # LeetCode刷题笔记
-[toc]
+- [LeetCode刷题笔记](#leetcode刷题笔记)
+    - [1、HOT 100](#1hot-100)
+      - [1.1 HOT100-LC3-无重复最长子串](#11-hot100-lc3-无重复最长子串)
+    - [2.ByteDance](#2bytedance)
+
 
 ### 1、HOT 100
 #### 1.1 HOT100-LC3-无重复最长子串
@@ -11,7 +15,7 @@
     * 哈希表用于快速寻找到上一个相同字符的位置
   * 动态规划+哈希表
 * 滑动窗口+哈希表代码
-  * 注意:hashmap的容量不要错误指定，否则会提高时间复杂度-->todo 源码确认
+  * 注意:hashmap的容量不要错误指定，否则会提高时间复杂度-->todo hashmp源码确认
 ```java
 public int lengthOfLongestSubstring(String s) {
     if (Objects.isNull(s) || s.length() == 0) {
@@ -72,3 +76,5 @@ public int lengthOfLongestSubstring(String s) {
     return max;
 }
 ```
+
+### 2.ByteDance
