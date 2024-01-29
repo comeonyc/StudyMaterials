@@ -17,7 +17,7 @@
     * 哈希表用于快速寻找到上一个相同字符的位置
   * 动态规划+哈希表
 * 滑动窗口+哈希表代码
-  * 注意:hashmap的容量不要错误指定，否则会提高时间复杂度-->todo hashmp源码确认
+  * 注意:hashmap的容量不要错误指定，否则会提高时间复杂度-->原因是hashmap用迭代器删除时，next操作会遍历hashmap的底层数组，数组越大，删除操作的复杂度就越高
 ```java
 public int lengthOfLongestSubstring(String s) {
     if (Objects.isNull(s) || s.length() == 0) {
