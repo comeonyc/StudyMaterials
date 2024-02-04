@@ -3,6 +3,7 @@
     - [1、HOT 100](#1hot-100)
       - [1.1 HOT100-LC3-无重复最长子串](#11-hot100-lc3-无重复最长子串)
       - [1.2 HOT100-LC4 寻找两个正序数组中的中位数](#12-hot100-lc4-寻找两个正序数组中的中位数)
+      - [1.3 HOT100-LC10-正则表达式匹配](#13-hot100-lc10-正则表达式匹配)
     - [2.ByteDance](#2bytedance)
 
 
@@ -151,5 +152,97 @@ public int findK(int[] nums1, int[] nums2, int k) {
     }
 }
 ```
+#### 1.3 HOT100-LC10-正则表达式匹配
+* 题目描述
+  * 给定字符串s和p，实现一个支持 '.' 和 '*' 的正则表达式匹配
+* 解题思路：
+  * 递归
+  * 动态规划
+* 递归
+  * 遍历两个字符串，判断两个字符是否相等或p是否是'.'
+    * 如果相等，要判断一下是单一匹配，还是*匹配
+    * 如果p+1是*，则进行*匹配
+  * 如果当前两个遍历位置不相等，判断p+1是不是'*'
+    * 如果是，则可以匹配0次
+    * 如果不是，则不匹配
+  * 代码
+  ```java
+    public boolean isMatch(String s, String p) {
+        return match(s.toCharArray(), p.toCharArray(), 0, 0);
+    }
+
+    private boolean match(char[] s, char[] p, int sIndex, int pIndex) {
+        if (sIndex == s.length && pIndex == p.length) {
+            return true;
+        }
+
+        if (sIndex < s.length && pIndex < p.length && canEqual(s, p, sIndex, pIndex)) {
+            if (pIndex + 1 < p.length && p[pIndex + 1] == '*') {
+                //match zero / multi
+                return match(s, p, sIndex, pIndex + 2)  || match(s, p, sIndex + 1, pIndex);
+            } else {
+                //match one
+                return match(s, p, sIndex+1, pIndex + 1);
+            }
+        } else if (pIndex + 1 < p.length && p[pIndex + 1] == '*') {
+            return match(s, p, sIndex, pIndex + 2);
+        } else {
+            return false;
+        }
+    }
+
+    private boolean canEqual(char[] s, char[] p, int sIndex, int pIndex) {
+        return (sIndex < s.length && pIndex < p.length && (s[sIndex] == p[pIndex])) || (pIndex < p.length && p[pIndex] == '.');
+    }
+  ```
+* 动态规划
+  * 定义二维数组dp[i][j],表示0-i的s子串和0-j的子串p是否满足匹配
+  * 那么dp方程如下：
+    * 如果s[i]=p[j]-->dp[i][j] = dp[i-1][j-2]
+    * 如果上述不成立，判断p[j]是不是*，如果是*有机会做多次或0次匹配
+      * 如果s[i-1]=p[j-1] || p[j-1] == '.'，
+        * 则有机会进行多次匹配，dp[i][j] = dp[i-1][j],也就是让p[j-1]* 这个字符在顶替一下
+        * 也可以不匹配，dp[i][j] = dp[i][j-2],让p[j-1]*不匹配s
+      * 如果s[i-1] !=p[j-1] && p[j-1] == '.',则只能让这个* 不匹配p[j-1],要看下不匹配是否满足dp[i][j] = dp[i][j-2]
+  * 初始化
+    * 让dp[s.length()+1][p.length()+1]的范围比s和p的长度大一，这样可以减少dp转移方程时的越界判断量
+    * 且dp[0][0]=true --> 两个空串恒匹配
+    * 如果想dp[0][j]=true，那么一定是用重复的.*来稀释，所以判断有几个.*出现，*的index，则是true
+  * 代码
+```java
+public boolean isMatch(String s, String p) {
+    char[] ss = s.toCharArray();
+    char[] pp = p.toCharArray();
+    boolean[][] dp = new boolean[ss.length + 1][pp.length + 1];
+
+    //init otherwise will array index overreach
+    dp[0][0] = true;
+    for (int j = 2; j <= pp.length; j += 2)
+        dp[0][j] = dp[0][j - 2] && p.charAt(j - 1) == '*';
+
+    for (int i = 1; i <= ss.length; i++) {
+        for (int j = 1; j <= pp.length; j++) {
+            if (canEqual(ss, pp, i - 1, j - 1)) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else if (pp[j - 1] == '*') {
+                if (canEqual(ss, pp, i - 1, j - 2)) {
+                    dp[i][j] = dp[i][j - 2] || dp[i - 1][j];
+                } else {
+                    dp[i][j] = dp[i][j - 2];
+                }
+            } else {
+                dp[i][j] = false;
+            }
+        }
+    }
+
+    return dp[ss.length][pp.length];
+}
+
+private boolean canEqual(char[] s, char[] p, int sIndex, int pIndex) {
+    return (sIndex < s.length && pIndex < p.length && (s[sIndex] == p[pIndex])) || (pIndex < p.length && p[pIndex] == '.');
+}
+```
+
 
 ### 2.ByteDance
