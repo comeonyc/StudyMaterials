@@ -4,6 +4,7 @@
       - [1.1 HOT100-LC3-无重复最长子串](#11-hot100-lc3-无重复最长子串)
       - [1.2 HOT100-LC4 寻找两个正序数组中的中位数](#12-hot100-lc4-寻找两个正序数组中的中位数)
       - [1.3 HOT100-LC10-正则表达式匹配](#13-hot100-lc10-正则表达式匹配)
+      - [1.4 HOT100-LC11-盛最多水的容器](#14-hot100-lc11-盛最多水的容器)
     - [2.ByteDance](#2bytedance)
 
 
@@ -242,6 +243,33 @@ private boolean canEqual(char[] s, char[] p, int sIndex, int pIndex) {
     return (sIndex < s.length && pIndex < p.length && (s[sIndex] == p[pIndex])) || (pIndex < p.length && p[pIndex] == '.');
 }
 ```
-
+#### 1.4 HOT100-LC11-盛最多水的容器
+* 题目描述
+  * 给定一个长度为 n 的整数数组 height 。有 n 条垂线，第 i 条线的两个端点是 (i, 0) 和 (i, height[i]) 。
+  * 找出其中的两条线，使得它们与 x 轴共同构成的容器可以容纳最多的水。
+* 解题思路
+  * 双指针
+    * 题目所求为下面公式的最大值：Math.min(height[right],height[left])*(right-left)
+    * 比较left和right的高度，因为left和right是相遇运动，会让(right-left)变小，那么如果要让整个值变大，只能是淘汰低的，直至left和right相遇
+  * 正确性证明
+    * [原证明](https://leetcode.cn/problems/container-with-most-water/solutions/94102/on-shuang-zhi-zhen-jie-fa-li-jie-zheng-que-xing-tu)
+    * 核心点在于每次比较高度，可以排除 **低高度** 的最大值，这样做相遇运动时不会丢数据
+    * ![证明图片](./pic/lc11-proof.png "proof")
+  * 代码
+```java
+public int maxArea(int[] height) {
+    int left = 0, right = height.length - 1;
+    int max = 0;
+    while (left < right) {
+        max = Math.max(max, (right - left) * Math.min(height[left], height[right]));
+        if (height[left] > height[right]) {
+            right--;
+        } else {
+            left++;
+        }
+    }
+    return max;
+}
+```
 
 ### 2.ByteDance

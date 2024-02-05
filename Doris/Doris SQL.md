@@ -6,7 +6,7 @@ Doris是基于MPP架构的交互式SQL数据仓库，主要用于解决近实时
 ## 2、BE
 * 负责数据存储和具体的实施过程。
 ## 3、Tablet 数据分桶
-* 在 Doris 的存储引擎中，用户数据被水平划分为若干个数据分片（Tablet，也称作数据分桶）。每个 Tablet 包含若干数据行。
+* 在 Doris 的存储引擎中，用户数据被水平划分为若干个数据分片（Tablet，也称作数据分   桶）。每个 Tablet 包含若干数据行。
 * 多个 Tablet 在逻辑上归属于不同的分区Partition。
 * 一个 Tablet 只属于一个 Partition。而一个 Partition包含若干个 Tablet。
 * Tablet 是数据移动、复制等操作的最小物理存储单元。
