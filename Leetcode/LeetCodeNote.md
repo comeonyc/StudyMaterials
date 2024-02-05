@@ -1,15 +1,56 @@
 # LeetCode刷题笔记
 - [LeetCode刷题笔记](#leetcode刷题笔记)
-    - [1、HOT 100](#1hot-100)
-      - [1.1 HOT100-LC3-无重复最长子串](#11-hot100-lc3-无重复最长子串)
-      - [1.2 HOT100-LC4 寻找两个正序数组中的中位数](#12-hot100-lc4-寻找两个正序数组中的中位数)
-      - [1.3 HOT100-LC10-正则表达式匹配](#13-hot100-lc10-正则表达式匹配)
-      - [1.4 HOT100-LC11-盛最多水的容器](#14-hot100-lc11-盛最多水的容器)
-    - [2.ByteDance](#2bytedance)
+  - [0、基础算法](#0基础算法)
+    - [0.1 快速排序](#01-快速排序)
+  - [1、HOT 100](#1hot-100)
+    - [1.1 HOT100-LC3-无重复最长子串](#11-hot100-lc3-无重复最长子串)
+    - [1.2 HOT100-LC4 寻找两个正序数组中的中位数](#12-hot100-lc4-寻找两个正序数组中的中位数)
+    - [1.3 HOT100-LC10-正则表达式匹配](#13-hot100-lc10-正则表达式匹配)
+    - [1.4 HOT100-LC11-盛最多水的容器](#14-hot100-lc11-盛最多水的容器)
+    - [1.5 LC100-15-三数之和](#15-lc100-15-三数之和)
+  - [2.ByteDance](#2bytedance)
+
+## 0、基础算法
+### 0.1 快速排序
+* 算法思路（以升序讲解）
+  * 指定一个标识位，找到标识位的位置，把标识位移到哪里，然后重复移动左区间和右区间，即可
+  * 如何找？将比他大的移动到右边，将比他小的移动到左边，直至左右重合就是它的位置
+* 代码实现要点
+  * 如果以最左边为基准，升序时要先找比它大的（先移动右指针）
+  * 如果以最左边为基准，降序要先找比它小的（先移动左指针）-->代证明
+  * **原因**
+    * 反证。
+    * 升序时，如果先找比它小的，则相当于l向r移动。最后移动到r的时候，r位置的数一定比最左边的数要大，那么最后移动时相当于把比这个大的数移动过去了，造成排序失败
+* 代码
+```java
+private void quickSort(int[] nums, int left, int right) {
+    if (left >= right) {
+        return;
+    }
+
+    int index = nums[left];
+    int l = left, r = right;
+    while (l < r) {
+        while (l < r && nums[r] > index) {
+            r--;
+        }
+        while (l < r && nums[l] <= index) {
+            l++;
+        }
+        swap(nums, l, r);
+    }
+    nums[left] = nums[l];
+    nums[l] = index;
+    quickSort(nums, left, l - 1);
+    quickSort(nums, l + 1, right);
+}
+```
 
 
-### 1、HOT 100
-#### 1.1 HOT100-LC3-无重复最长子串
+* * *
+
+## 1、HOT 100
+### 1.1 HOT100-LC3-无重复最长子串
 * 题目描述
   * 给定一个字符串s，找出其中不含邮重复字符的 **最长子串** 长度
 * 解题方案
@@ -80,7 +121,7 @@ public int lengthOfLongestSubstring(String s) {
 }
 ```
 
-#### 1.2 HOT100-LC4 寻找两个正序数组中的中位数
+### 1.2 HOT100-LC4 寻找两个正序数组中的中位数
 * 题目描述
   * 给定两个正序数组，寻找这两个有序数组的中位数；并要求时间复杂度log(m+n)
   * [1,2],[3,4] --> 2.5000
@@ -152,7 +193,7 @@ public int findK(int[] nums1, int[] nums2, int k) {
     }
 }
 ```
-#### 1.3 HOT100-LC10-正则表达式匹配
+### 1.3 HOT100-LC10-正则表达式匹配
 * 题目描述
   * 给定字符串s和p，实现一个支持 '.' 和 '*' 的正则表达式匹配
 * 解题思路：
@@ -243,7 +284,7 @@ private boolean canEqual(char[] s, char[] p, int sIndex, int pIndex) {
     return (sIndex < s.length && pIndex < p.length && (s[sIndex] == p[pIndex])) || (pIndex < p.length && p[pIndex] == '.');
 }
 ```
-#### 1.4 HOT100-LC11-盛最多水的容器
+### 1.4 HOT100-LC11-盛最多水的容器
 * 题目描述
   * 给定一个长度为 n 的整数数组 height 。有 n 条垂线，第 i 条线的两个端点是 (i, 0) 和 (i, height[i]) 。
   * 找出其中的两条线，使得它们与 x 轴共同构成的容器可以容纳最多的水。
@@ -272,4 +313,10 @@ public int maxArea(int[] height) {
 }
 ```
 
-### 2.ByteDance
+### 1.5 LC100-15-三数之和
+* 题目描述
+  * 给定一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k。同时还满足 nums[i] + nums[j] + nums[k] == 0 。
+* 解题思路
+  * 快排 + 双指针求解两数和
+
+## 2.ByteDance
