@@ -7,7 +7,9 @@
     - [1.2 HOT100-LC4 寻找两个正序数组中的中位数](#12-hot100-lc4-寻找两个正序数组中的中位数)
     - [1.3 HOT100-LC10-正则表达式匹配](#13-hot100-lc10-正则表达式匹配)
     - [1.4 HOT100-LC11-盛最多水的容器](#14-hot100-lc11-盛最多水的容器)
-    - [1.5 LC100-15-三数之和](#15-lc100-15-三数之和)
+    - [1.5 HOT100-LC15-三数之和](#15-hot100-lc15-三数之和)
+    - [1.6 HOT100-LC26-合并K个升序链表](#16-hot100-lc26-合并k个升序链表)
+    - [1.7 HOT100-LC31-下一个排列](#17-hot100-lc31-下一个排列)
   - [2.ByteDance](#2bytedance)
 
 ## 0、基础算法
@@ -313,10 +315,211 @@ public int maxArea(int[] height) {
 }
 ```
 
-### 1.5 LC100-15-三数之和
+### 1.5 HOT100-LC15-三数之和
 * 题目描述
   * 给定一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k。同时还满足 nums[i] + nums[j] + nums[k] == 0 。
 * 解题思路
   * 快排 + 双指针求解两数和
+* 代码
+```java
+public List<List<Integer>> threeSum(int[] nums) {
+    quickSort(nums, 0, nums.length - 1);
+    List<List<Integer>> result = new ArrayList<>();
+    for (int i = 0; i < nums.length; i++) {
+        if (nums[i] > 0) {
+            break;
+        }
+        if (i > 0 && nums[i] == nums[i - 1]) {
+            continue;
+        }
+
+        int remain = -nums[i];
+        int l = i + 1, r = nums.length - 1;
+        while (l < r) {
+            int sum = nums[l] + nums[r];
+            if (sum == remain) {
+                List<Integer> objects = new ArrayList<>(3);
+                objects.add(nums[i]);
+                objects.add(nums[l]);
+                objects.add(nums[r]);
+                result.add(objects);
+                while (l < r && nums[l + 1] == nums[l]) {
+                    l++;
+                }
+                l++;
+
+                while (l < r && nums[r - 1] == nums[r]) {
+                    r--;
+                }
+                r--;
+            } else if (sum > remain) {
+                r--;
+            } else {
+                l++;
+            }
+        }
+    }
+    return result;
+}
+
+private void quickSort(int[] nums, int left, int right) {
+    if (left >= right) {
+        return;
+    }
+
+    int index = nums[left];
+    int l = left, r = right;
+    while (l < r) {
+        while (l < r && nums[r] > index) {
+            r--;
+        }
+        while (l < r && nums[l] <= index) {
+            l++;
+        }
+        swap(nums, l, r);
+    }
+    nums[left] = nums[l];
+    nums[l] = index;
+    quickSort(nums, left, l - 1);
+    quickSort(nums, l + 1, right);
+}
+
+private void swap(int[] nums, int l, int r) {
+    int tmp = nums[l];
+    nums[l] = nums[r];
+    nums[r] = tmp;
+} 
+```
+### 1.6 HOT100-LC26-合并K个升序链表
+* 题目描述
+  * 给定K个升序链表，合并成一个升序链表
+  * 有时间复杂度要求
+* 解题思路：假定共有K个链表，N个节点
+  * 暴力解法时间复杂度分析：平均每个节点会比较N-1次，总共时间复杂度是$N*(N-1)$，也就是$O(N^2)$
+  * 分治法时间复杂度分析: 两两合并，将合并后的链表在进行合并，这样其中每个链表会比较$logK$次，共有K个链表，也就是$K*logK$次。每个链表平均有$N/K$个节点，故整体时间复杂度为：$(N/K)*K*logK = O(N*logK)$
+* 代码
+```java
+public ListNode mergeKLists(ListNode[] lists) {
+    if (null == lists || lists.length == 0) {
+        return null;
+    }
+    if (lists.length == 1) {
+        return lists[0];
+    }
+
+    int start = 0;
+    int i = 0;
+    int size = lists.length;
+
+    while (size != 1) {
+        while (i < size) {
+            if (i + 1 < size) {
+                lists[start++] = mergeTwo(lists[i], lists[i + 1]);
+            } else {
+                lists[start++] = lists[i];
+            }
+            i += 2;
+        }
+        size = start;
+        i = 0;
+        start = 0;
+    }
+
+    return lists[0];
+}
+
+public ListNode mergeTwo(ListNode l1, ListNode l2) {
+    if (null == l1) {
+        return l2;
+    }
+
+    if (null == l2) {
+        return l1;
+    }
+
+    ListNode result = new ListNode();
+    ListNode tmp = result;
+
+    while (null != l1 && null != l2) {
+
+        if (l1.val <= l2.val) {
+            tmp.next = new ListNode(l1.val);
+            l1 = l1.next;
+        } else {
+            tmp.next = new ListNode(l2.val);
+            l2 = l2.next;
+        }
+        tmp = tmp.next;
+    }
+
+    if (null != l1) {
+        tmp.next = l1;
+    }
+
+    if (null != l2) {
+        tmp.next = l2;
+    }
+
+    return result.next;
+}
+```
+  
+### 1.7 HOT100-LC31-下一个排列
+* 题目描述
+  * 寻找字典序下的下一个排列，例如1，2，3-->下一个排列就是1，3，2
+* 解题思路
+  * 直观上看，如果一个排列是 **降序排列** ，那么不存在比当前排列更大的字典序排列，例如3，2，1
+  * 故关键思路1:一定是从后往前看，那个升序的点才是核心点
+  * 例如[1,3,4,7,6,5,2],一定是在4,7的位置才可能出现下一个排列
+  * 并且从4的位置看，[7,6,5,2]没有比它更大的字典序
+  * 如何根据这个位置进而找到整个排列的下个排列？ 从后往前遍历，找到比4大的那个位置，也就是5，并且将4和5交换，然后将[7,6,4,2]做升序排序后，就可以得到最下一个字典序最大的
+  * 由于[7,6,4,2]肯定是降序的，故可以采取收尾交换排序的方式，减少时间复杂度
+* 代码
+```java
+public void nextPermutation(int[] nums) {
+    // step 1 : traverse array from end to start
+    // find the flag pos where nums[i] > nums[i-1]
+    int i = nums.length - 1;
+    while (i - 1 >= 0 && nums[i] <= nums[i - 1]) {
+        i--;
+    }
+    int left = i;
+
+    // handle start case
+    if (i == 0) {
+        headToTailSort(nums, 0, nums.length - 1);
+        return;
+    }
+
+    // step 2 : traverse array from end to left
+    // find the number which more than nums[flag]
+    i = nums.length - 1;
+    while (i > left && nums[i] <= nums[left - 1]) {
+        i--;
+    }
+    int right = i;
+
+    // step 3 : swap nums[left],nums[right]
+    swap(nums, left - 1, right);
+
+    // step 4 : sort array from left to end, ensure asc order(skip:head to tail exchange)
+    headToTailSort(nums, left, nums.length - 1);
+}
+
+private void headToTailSort(int[] nums, int start, int end) {
+    int left = start, right = end;
+    while (left < right) {
+        swap(nums, left, right);
+        left++;
+        right--;
+    }
+}
+
+private void swap(int[] nums, int a, int b) {
+    int tmp = nums[a];
+    nums[a] = nums[b];
+    nums[b] = tmp;
+}
+```
 
 ## 2.ByteDance
