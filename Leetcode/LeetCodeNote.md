@@ -10,6 +10,8 @@
     - [1.5 HOT100-LC15-三数之和](#15-hot100-lc15-三数之和)
     - [1.6 HOT100-LC26-合并K个升序链表](#16-hot100-lc26-合并k个升序链表)
     - [1.7 HOT100-LC31-下一个排列](#17-hot100-lc31-下一个排列)
+    - [1.7 HOT100-LC33-搜索旋转排序数组](#17-hot100-lc33-搜索旋转排序数组)
+    - [1.8 HOT100-LC42-接雨水](#18-hot100-lc42-接雨水)
   - [2.ByteDance](#2bytedance)
 
 ## 0、基础算法
@@ -521,5 +523,151 @@ private void swap(int[] nums, int a, int b) {
     nums[b] = tmp;
 }
 ```
+
+### 1.7 HOT100-LC33-搜索旋转排序数组
+* 题目描述
+  * 整数数组 nums 按升序排列，数组中的值 互不相同 。
+  * 给定一个 旋转后 的数组 nums 和一个整数 target ，如果 nums 中存在这个目标值 target ，则返回它的下标，否则返回 -1 。
+* 解题思路
+  * 定理一：只有在顺序区间内才可以通过区间两端的数值判断target是否在其中。
+  * 定理二：判断顺序区间还是乱序区间，只需要对比 left 和 right 是否是顺序对即可，nums[left] <= nums[right]，顺序区间，否则乱序区间。
+  * 定理三：每次二分都会至少存在一个顺序区间
+  * 通过不断的用Mid二分，根据定理二，将整个数组划分成顺序区间和乱序区间，然后利用定理一判断target是否在顺序区间，如果在顺序区间，下次循环就直接取顺序区间，如果不在，那么下次循环就取乱序区间。
+* 代码
+```java
+public int search(int[] nums, int target) {
+    int left = 0, right = nums.length - 1;
+    while (left <= right) {
+        int middle = (left + right) / 2;
+        if (target == nums[middle]) {
+            return middle;
+        }
+
+        if (nums[middle] < nums[right]) {
+            if (nums[middle] < target && target <= nums[right]) {
+                left = middle + 1;
+            } else {
+                right = middle - 1;
+            }
+        } else {
+            if (nums[left] <= target && target < nums[middle]) {
+                right = middle - 1;
+            } else {
+                left = middle + 1;
+            }
+        }
+    }
+    return -1;
+}
+```
+
+### 1.8 HOT100-LC42-接雨水
+* 题目描述
+  *  * 给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+* 解法
+  * 按行求
+  * 单调栈
+  * 按列求
+* 按行求
+  * 主旨思想：求第 i 层的水，遍历每个位置，如果当前的高度小于 i，并且两边有高度大于等于 i 的，说明这个地方一定有水，水就可以加1
+```java
+public int trap(int[] height) {
+    int max = 0;
+    for (int i : height) {
+        max = Math.max(i, max);
+    }
+
+    int sum = 0;
+    for (int i = 1; i <= max; i++) {
+        boolean start = false;
+        int tmp = 0;
+        for (int j : height) {
+            if (start && j < i) {
+                tmp++;
+            }
+
+            if (j >= i) {
+                sum += tmp;
+                tmp = 0;
+                start = true;
+            }
+        }
+    }
+    return sum;
+}
+```
+* 单调栈
+  * 大致思想：如果数组呈降序排列，那一定没有水能接住，只有遇到升序的情况才可能接到水，故可以用一个**递减栈**
+  * 遍历到当前元素，如果该元素比栈顶大，那么此时可以接到水。此时栈顶出是凹字形的最低点，比较次栈的和当前元素的大小即可获取能接住的高度
+```java
+public int trap(int[] height) {
+    Stack<Integer> stack = new Stack<>();
+    int sum = 0;
+
+    for (int i = 0; i < height.length; i++) {
+        while (!stack.isEmpty() && height[i] >= height[stack.peek()]) {
+            int high = height[stack.pop()];
+            if (stack.isEmpty()) {
+                break;
+            }
+            int minHigh = Math.min(height[stack.peek()], height[i]);
+            sum += (minHigh - high) * (i - stack.peek() - 1);
+        }
+        stack.push(i);
+    }
+    return sum;
+}
+```
+* 按列求
+  * 从每一列看，该列能接住多少水由其左侧及右侧的最高处决定
+```java
+public int trap(int[] height) {
+    int[] maxLeft = new int[height.length];
+    int[] maxRight = new int[height.length];
+
+    for (int i = 1; i < height.length; i++) {
+        maxLeft[i] = Math.max(maxLeft[i - 1], height[i - 1]);
+    }
+    for (int i = height.length - 2; i >= 0; i--) {
+        maxRight[i] = Math.max(maxRight[i + 1], height[i + 1]);
+    }
+
+    int sum = 0;
+    for (int i = 1; i < height.length - 1; i++) {
+        int min = Math.min(maxLeft[i], maxRight[i]);
+        if (min > height[i]) {
+            sum += min - height[i];
+        }
+    }
+    return sum;
+}
+
+//优化代码
+public int trap(int[] height) {
+    int len = height.length;
+    int left=0,right=len-1,leftMax = height[0],rightMax = height[len-1];
+
+
+    int result = 0;
+    while(left<right){
+        leftMax = Math.max(leftMax, height[left]);
+        rightMax = Math.max(rightMax, height[right]);
+        if (leftMax <rightMax) {
+            // 左指针的leftMax比右指针的rightMax矮
+            // 说明：左指针的右边至少有一个板子 > 左指针左边所有板子
+            // 根据水桶效应，保证了左指针当前列的水量决定权在左边
+            // 那么可以计算左指针当前列的水量：左边最大高度-当前列高度
+            result += leftMax - height[left];
+            ++left;
+        } else {
+            result += rightMax - height[right];
+            --right;
+        }
+    }
+    return result;
+}
+```
+
+
 
 ## 2.ByteDance
