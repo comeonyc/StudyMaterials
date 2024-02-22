@@ -12,6 +12,7 @@
     - [1.7 HOT100-LC31-下一个排列](#17-hot100-lc31-下一个排列)
     - [1.7 HOT100-LC33-搜索旋转排序数组](#17-hot100-lc33-搜索旋转排序数组)
     - [1.8 HOT100-LC42-接雨水](#18-hot100-lc42-接雨水)
+    - [1.9 HOT100-LC55-跳跃游戏](#19-hot100-lc55-跳跃游戏)
   - [2.ByteDance](#2bytedance)
 
 ## 0、基础算法
@@ -667,7 +668,74 @@ public int trap(int[] height) {
     return result;
 }
 ```
+### 1.9 HOT100-LC55-跳跃游戏
+* 题目描述
+  * 给定非负整数数组 nums ，最初位于数组的第一个下标 。数组中的每个元素代表你在该位置可以跳跃的最大长度。判断你是否能够到达最后一个下标。
+* 解题思路
+  * 动态规划
+  * 贪心
+* 动态规划
+  * 定义dp[i],代表i下标一次能跳跃的最大位置
+  * 动态方程
+    * 下标i一次能到达的最大位置右两点决定
+      * 该位置跳跃的最远距离没有上一个下标跳的远：dp[i] = dp[i-1]
+      * 该位置跳跃的最远距离比上一个下表跳的远 dp[i] = i+nums[i] 
+    * 取上述两者的最大值即可 $dp[i] = Math.max(dp[i-1],nums[i]+i)$
+  * 如何判断能否跳到最后？
+    * 如果当前能跳的最大位置 大于数组长度，即可以 $dp[i]>nums.length$
+    * 如果当前跳的最大位置 等于 该数组下标，也就是跳不动了，则不可以跳到最后 $dp[i]==i$
+  * 代码如下
+```java
+public boolean canJump(int[] nums) {
+    if (nums.length == 1) {
+        return true;
+    }
+    if (nums[0] == 0) {
+        return false;
+    }
+    int[] dp = new int[nums.length];
+    dp[0] = nums[0];
+    int max = nums.length - 1;
+    for (int i = 1; i < nums.length; i++) {
+        dp[i] = Math.max(dp[i - 1], i + nums[i]);
+        if (dp[i] >= max) {
+            return true;
+        }
+        if (dp[i] == i) {
+            return false;
+        }
+    }
+    return false;
+}
+```
+* 贪心
+  * 记录当前能跳到的最大下标maxRight
+  * 遍历数组，如果当前下标 $i<=maxRight$,一定说明可以走到这个下标处，此时更新一下maxRight，即$maxRight = Math.max(maxRight,i+nums[i])$
+  * 如果走不到，则说明不能跳到最后
+  * 如果当前maxRight比数组长度大，那么就可以
+```java
+public boolean canJump(int[] nums) {
+    if (nums.length == 1) {
+        return true;
+    }
+    if (nums[0] == 0) {
+        return false;
+    }
 
+    int maxRight = 0;
+    for (int i = 0; i < nums.length; i++) {
+        if (maxRight >= i) {
+            maxRight = Math.max(i + nums[i], maxRight);
+        } else {
+            return false;
+        }
 
+        if (maxRight >= nums.length - 1) {
+            return true;
+        }
+    }
+    return false;
+}
+```
 
 ## 2.ByteDance
