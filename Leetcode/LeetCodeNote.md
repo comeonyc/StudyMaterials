@@ -13,6 +13,7 @@
     - [1.7 HOT100-LC33-搜索旋转排序数组](#17-hot100-lc33-搜索旋转排序数组)
     - [1.8 HOT100-LC42-接雨水](#18-hot100-lc42-接雨水)
     - [1.9 HOT100-LC55-跳跃游戏](#19-hot100-lc55-跳跃游戏)
+    - [1.10 HOT100-LC72-编辑距离](#110-hot100-lc72-编辑距离)
   - [2.ByteDance](#2bytedance)
 
 ## 0、基础算法
@@ -737,5 +738,51 @@ public boolean canJump(int[] nums) {
     return false;
 }
 ```
+
+### 1.10 HOT100-LC72-编辑距离
+* 题目描述
+  * 给定两个单词 word1 和 word2， 请返回将 word1 转换成 word2 所使用的最少操作数。
+  * 每次操作对word1添加一个字符、删除一个字符、或替换一个字符
+* 解题思路
+  * 动态规划
+* 动态规划
+  * 1、定义dp[i][j] --> 代表（0,i）的word1子串转换成word2子串的最少操作数
+  * 2、dp方程
+    * 如果word1[i] == word[j] --> $dp[i][j] = dp[i-1][j-1]$
+    * 否则
+      * 添加字符：相当于是从(0,i-1)的word1的子串添加一个字符，使得word1(0,i) == word2(0,j)-->$dp[i][j] = dp[i-1][j]+1$
+      * 删除字符：相当于是在(0,i)的word1子串，删除i位置的字符，使得word1(0,i) == word2(0,j-1)-->$dp[i][j] = dp[i][j-1]+1$
+      * 替换字符：相当于是把i处的word1字符替换成word2的j字符，故从word1(0,i-1) = word2(0,j-1)的基础上加一个操作即可-->$dp[i][j] = dp[i-1][j-1]+1$ 
+      * 上述三种操作取最小值就是dp[i][j]
+* 代码如下
+```java
+public int minDistance(String word1, String word2) {
+    int l1 = word1.length();
+    int l2 = word2.length();
+    int[][] dp = new int[l1 + 1][l2 + 1];
+    for (int i = 1; i <= l2; i++) {
+        dp[0][i] = i;
+    }
+    for (int i = 1; i <= l1; i++) {
+        dp[i][0] = i;
+    }
+
+    for (int i = 1; i <= l1; i++) {
+        for (int j = 1; j <= l2; j++) {
+            if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                int add = dp[i - 1][j] + 1;
+                int delete = dp[i][j - 1] + 1;
+                int replace = dp[i - 1][j - 1] + 1;
+                dp[i][j] = Math.min(add, Math.min(delete, replace));
+            }
+        }
+    }
+
+    return dp[l1][l2];
+}
+```
+
 
 ## 2.ByteDance
