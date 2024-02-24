@@ -16,6 +16,7 @@
     - [1.9 HOT100-LC55-跳跃游戏](#19-hot100-lc55-跳跃游戏)
     - [1.10 HOT100-LC72-编辑距离](#110-hot100-lc72-编辑距离)
     - [1.11 HOT100-LC128-最长连续序列](#111-hot100-lc128-最长连续序列)
+    - [1.12 HOT100-LC139-单词拆分](#112-hot100-lc139-单词拆分)
   - [2.ByteDance](#2bytedance)
 
 ## 0、基础算法
@@ -880,6 +881,49 @@ public int longestConsecutive(int[] nums) {
     return res;
 }
 ```
-
+### 1.12 HOT100-LC139-单词拆分
+* 题目描述
+  * 给你一个字符串 s 和一个字符串列表 wordDict 作为字典。如果可以利用字典中出现的一个或多个单词拼接出 s 则返回 true。
+* 解法
+  * 递归搜索
+  * 动态规划
+* 递归搜索
+  * 遍历字符串，与字典比较
+  * 如果当前开始的位置能与字典对照上，则继续向下搜索，否则则失败
+```java
+public boolean wordBreak(String s, int index, List<String> wordDict) {
+    if (index == s.length()) {
+        return true;
+    }
+    for (String string : wordDict) {
+        if (s.startsWith(string, index) && wordBreak(s, index + string.length(), wordDict)) {
+            return true;
+        }
+    }
+    return false;
+}
+```
+* 动态规划
+  * 定义dp,boolean[] dp, dp[i]则代表0-i处的字符串是否从字典中搜索
+  * 初始值：dp[0] 代表空串,默认可以搜索
+  * dp方程
+    * 将字符串分为两段(0,j)和(j,i)
+    * 如果(0,j)可以搜索，并且(j,i)的子串也在字典中能搜索到才可以，故方程如下
+      * dp[i] = dp[j] && dict.contain(s.substring(j,i))
+```java
+public boolean wordBreak(String s, List<String> wordDict) {
+    boolean[] dp = new boolean[s.length() + 1];
+    dp[0] = true;
+    for (int i = 1; i <= s.length(); i++) {
+        for (int j = 0; j <= i; j++) {
+            if (dp[j] && wordDict.contains(s.substring(j, i))) {
+                dp[i] = true;
+                break;
+            }
+        }
+    }
+    return dp[s.length()];
+}
+```
 
 ## 2.ByteDance
