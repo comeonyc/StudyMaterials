@@ -71,7 +71,7 @@ private void quickSort(int[] nums, int left, int right) {
 * 递增栈场景举例
   * [1,3,4,5,2,9,6]
     * step1:i=0, nums[i]=1, 栈空, 入栈[1]
-    * step2:i=1, nums[i]=3, $stack[peek]<nums[i]$, 入栈[1,3]
+    * step2:i=1, nums[i]=3, $stack[peek]<=nums[i]$, 入栈[1,3]
       * 栈顶看stack[peek]=1, 当前nums[i]=3,为此找不到比栈顶第一个小的元素，待找
       * 当前nums[i]=3,栈顶stack[peek]=1,比nums[i]小，所以左侧第一个比它小元素是1
     * step3:i=2, nums[i]=4, $stack[peek]<nums[i]$, 入栈[1,3,4]
