@@ -74,10 +74,10 @@ private void quickSort(int[] nums, int left, int right) {
     * step2:i=1, nums[i]=3, $stack[peek]<=nums[i]$, 入栈[1,3]
       * 栈顶看stack[peek]=1, 当前nums[i]=3,为此找不到比栈顶第一个小的元素，待找
       * 当前nums[i]=3,栈顶stack[peek]=1,比nums[i]小，所以左侧第一个比它小元素是1
-    * step3:i=2, nums[i]=4, $stack[peek]<nums[i]$, 入栈[1,3,4]
+    * step3:i=2, nums[i]=4, $stack[peek]<=nums[i]$, 入栈[1,3,4]
       * 栈顶看stack[peek]=3, 当前nums[i]=4,为此找不到比栈顶第一个小的元素，待找
       * 当前nums[i]=4,栈顶stack[peek]=3,比nums[i]小，所以左侧第一个比它小元素是3
-    * step4:i=3, nums[i]=5, $stack[peek]<nums[i]$, 入栈[1,3,4,5]
+    * step4:i=3, nums[i]=5, $stack[peek]<=nums[i]$, 入栈[1,3,4,5]
       * 栈顶看stack[peek]=4, 当前nums[i]=5, 为此找不到比栈顶第一个小的元素，待找
       * 当前nums[i]=5,栈顶stack[peek]=4,比nums[i]小，所以左侧第一个比它小元素是4
     * step5:i=5, nums[i]=2, $stack[peek]>nums[i]$, 入栈[1,2]
