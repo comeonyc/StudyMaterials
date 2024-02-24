@@ -15,6 +15,7 @@
     - [1.8 HOT100-LC42-接雨水](#18-hot100-lc42-接雨水)
     - [1.9 HOT100-LC55-跳跃游戏](#19-hot100-lc55-跳跃游戏)
     - [1.10 HOT100-LC72-编辑距离](#110-hot100-lc72-编辑距离)
+    - [1.11 HOT100-LC128-最长连续序列](#111-hot100-lc128-最长连续序列)
   - [2.ByteDance](#2bytedance)
 
 ## 0、基础算法
@@ -816,6 +817,67 @@ public int minDistance(String word1, String word2) {
     }
 
     return dp[l1][l2];
+}
+```
+### 1.11 HOT100-LC128-最长连续序列
+* 题目描述
+  * 给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+  * 限制时间复杂度O(n);
+* 解法
+  * 哈希表 + 是否尾节点过滤
+  * 动态规划，区间优化
+* 哈希表 + 是否尾节点过滤
+  * 将数组的元素线load到哈希表中
+  * 依次遍历
+    * 如果当前节点没有后续节点，也就是尾节点，则去找1️以该节点为尾节点的序列
+    * 如果有后续节点，则说明在前面的过程中已经遍历过了，故不用再次遍历
+    * 时间复杂度分析：大体分为两层循环，但是由于尾节点的优化，每个元素只会遍历2次，故时间复杂度是O(2n)
+```java
+public int longestConsecutive(int[] nums) {
+    Set<Integer> set = new HashSet<Integer>();
+    int ans = 0;
+    for (int num : nums) {
+        set.add(num);
+    }
+    for (int num : nums) {
+        int x = num;
+        // 说明x是连续序列的开头元素
+        if (!set.contains(x - 1)) {
+            while (set.contains(x + 1)) {
+                x++;
+            }
+        }
+        ans = Math.max(ans, x - num + 1);
+    }
+
+    return ans;
+}
+```
+* 动态规划（区间优化）
+  * 定义hashmap，key是当前元素，value是包含当前元素的最长子序列
+  * 遍历数组到i处
+    * 如果数组中出现过元素nums[i]-1或nums[i]+1，意味着当前元素可以归入左或右序列
+      * 那么此时假如左右序列的长度分别为left、right，显然加入nums[i]后，这整段序列的长度为 1+left+right
+      * **而由于这一整段序列中，只可能在左右两端扩展**，所以只需要更新左右两端的value值即可，不用关心中间节点的长度
+    * 数组中未出现过元素nums[i]-1或nums[i]+1，意味着当前元素所在的连续序列就是自身（只有自己一个元素）。
+```java
+public int longestConsecutive(int[] nums) {
+    Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+    int res = 0;
+    for (int num : nums) {
+        if (!map.containsKey(num)) {
+            int left = map.get(num - 1) == null ? 0 : map.get(num - 1);
+            int right = map.get(num + 1) == null ? 0 : map.get(num + 1);
+            int cur = 1 + left + right;
+            if (cur > res) {
+                res = cur;
+            }
+            map.put(num, -1);
+            map.put(num - left, cur);
+            map.put(num + right, cur);
+        }
+    }
+    return res;
 }
 ```
 
