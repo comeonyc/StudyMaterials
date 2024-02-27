@@ -21,6 +21,7 @@
     - [1.12 HOT100-LC139-单词拆分](#112-hot100-lc139-单词拆分)
     - [1.13 HOT100-LC142-环形链表(找到环入口)](#113-hot100-lc142-环形链表找到环入口)
     - [1.14 HOT100-LC152-数组的最大乘积](#114-hot100-lc152-数组的最大乘积)
+    - [1.15-HOT100-LC287-寻找重复数](#115-hot100-lc287-寻找重复数)
   - [2.ByteDance](#2bytedance)
 
 ## 0、基础算法
@@ -1080,7 +1081,43 @@ public int maxProduct(int[] nums) {
     return result;
 }
 ```
+### 1.15-HOT100-LC287-寻找重复数
+* 题目描述
+  * 给定一个包含 n + 1 个整数的数组 nums ，其数字都在 [1, n] 范围内（包括 1 和 n），可知至少存在一个重复的整数。
+  * 假设 nums 只有 一个重复的整数 ，返回 这个重复的数 。
+  * 不改变数组 
+* 做法
+  * 将其转化成循环链表
+* 循环链表找入口
+  * 大致做法
+    * 将数组想成链表，数组下标为链表的val,数组值为链表的next节点
+    * 例如[1,3,4,2,2,5] n=6
+      * 0->1, 1->3, 2->4, 3->2, 4->2, 5->5
+    * **由于共有n+1个节点，所以这个链表串起来后一定成环，且环的入口就是重复数**
+    * 故可以将其转化为链表的思想
+* 代码
+```java
+public int findDuplicate(int[] nums) {
+    int slow = 0;
+    int fast = 0;
+    while (true) {
+        slow = nums[slow];
+        fast = nums[nums[fast]];
+        if (slow == fast) {
+            break;
+        }
+    }
 
+    // 第二阶段：寻找循环的入口
+    fast = 0;
+    while (slow != fast) {
+        slow = nums[slow];
+        fast = nums[fast];
+    }
+
+    return slow;
+}
+```
 
 
 ## 2.ByteDance
