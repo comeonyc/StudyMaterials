@@ -3,6 +3,8 @@
   - [0、基础算法](#0基础算法)
     - [0.1 快速排序](#01-快速排序)
     - [0.2 单调栈](#02-单调栈)
+    - [0.3 链表-快慢指针](#03-链表-快慢指针)
+    - [0.4 摩尔投票法](#04-摩尔投票法)
   - [1、HOT 100](#1hot-100)
     - [1.1 HOT100-LC3-无重复最长子串](#11-hot100-lc3-无重复最长子串)
     - [1.2 HOT100-LC4 寻找两个正序数组中的中位数](#12-hot100-lc4-寻找两个正序数组中的中位数)
@@ -17,6 +19,8 @@
     - [1.10 HOT100-LC72-编辑距离](#110-hot100-lc72-编辑距离)
     - [1.11 HOT100-LC128-最长连续序列](#111-hot100-lc128-最长连续序列)
     - [1.12 HOT100-LC139-单词拆分](#112-hot100-lc139-单词拆分)
+    - [1.13 HOT100-LC142-环形链表(找到环入口)](#113-hot100-lc142-环形链表找到环入口)
+    - [1.14 HOT100-LC152-数组的最大乘积](#114-hot100-lc152-数组的最大乘积)
   - [2.ByteDance](#2bytedance)
 
 ## 0、基础算法
@@ -30,6 +34,12 @@
   * **原因**
     * 反证。
     * 升序时，如果先找比它小的，则相当于l向r移动。最后移动到r的时候，r位置的数一定比最左边的数要大，那么最后移动时相当于把比这个大的数移动过去了，造成排序失败
+* 基准点为什么设置在边界
+  * 基准点可以随意设置，但是一定要把其移动到边界上
+  * 原因：
+    * 如果基准点在遍历范围内，会造成基准点被计算进来
+    * 当左右指针相遇时，会进行一次交换，会把基准点的位置移动到正确位置，造成数据排序失败
+
 * 代码
 ```java
 private void quickSort(int[] nums, int left, int right) {
@@ -90,6 +100,66 @@ private void quickSort(int[] nums, int left, int right) {
         * 继续遍历, 此时栈顶是1, 比当前元素nums[i]小, 故找不到比栈定当前元素小的数, 但是从当前元素nums[i]看, 第一个比当前元素nums[i]小的元素就是1
     * 后面依次类推
 
+### 0.3 链表-快慢指针
+* 定义
+  * 解决链表问题的一种通用手段
+* 做法
+  * 定义两个指针fast，slow，初始值分别指向head节点
+  * 当fast不为null且slow不为null时，fast移动两次，slow移动一次
+    * 直至fast与slow相遇-->成环 
+    * fast=null || fast.next=null -> 此时slow节点在中间
+* 上述做法中
+  * 链表总共有偶数节点：slow在中间靠右的节点
+  * 链表总共有奇数节点：slow在正中间的节点
+  * 如果需要用到上面的特性，需要注意一下
+
+### 0.4 摩尔投票法
+* 定义
+  * 解决求多数元素的一种算法[1/k]
+* 关键idea/重要假设
+  * 假设求超过[1/3]的元素数量
+  * 两个条件可以知道
+    * 1、最多有2个这样的数（候选者）
+    * 2、校验候选者是否满足条件
+* 证明
+  * 共计n个元素，有k个相同元素
+  * 则有n-k个非多数元素
+  * 由摩尔投票法的 投票+抵消流程，极端情况下可以抵消$\lfloor (n-k) \div 2 \rfloor$次，
+  * 故设被抵消后还剩remain个元素，则
+    * $remain=k- \lfloor (n-k) \div 2 \rfloor$
+    * $remain>= k-(n-k) \div 2$
+    * $remian >= (3k-n) \div 2$
+    * 由题目可知,k>(n/3)
+    * 所以$remain > 0$ --> 也就是投票抵消后至少会剩一个候选者
+* 算法模板
+  * 1、先求出候选者-->如果超过1/3 候选者一定减不没
+  * 2、反向计算候选者是不是超过1/3
+  * 注意：抵消后不能设置为新的候选者
+```java
+public List<Integer> majorityElement(int[] nums) {
+    int n = nums.length;
+    int a = 0, b = 0;
+    int c1 = 0, c2 = 0;
+    for (int i : nums) {
+        if (c1 != 0 && a == i) c1++;
+        else if (c2 != 0 && b == i) c2++;
+        else if (c1 == 0 && ++c1 >= 0) a = i;
+        else if (c2 == 0 && ++c2 >= 0) b = i;
+        else {
+            c1--; c2--;
+        }
+    }
+    c1 = 0; c2 = 0;
+    for (int i : nums) {
+        if (a == i) c1++;
+        else if (b == i) c2++;
+    }
+    List<Integer> ans = new ArrayList<>();
+    if (c1 > n / 3) ans.add(a);
+    if (c2 > n / 3) ans.add(b);
+    return ans;
+}
+```
 * * *
 
 ## 1、HOT 100
@@ -925,5 +995,92 @@ public boolean wordBreak(String s, List<String> wordDict) {
     return dp[s.length()];
 }
 ```
+
+### 1.13 HOT100-LC142-环形链表(找到环入口)
+* 题目描述
+  * 给定一个链表的头节点 head ，返回链表开始入环的第一个节点。 如果链表无环，则返回 null。
+* 做法
+  * 1、快慢指针判断是否有环
+  * 2、有环后定位入口
+    * 有环则快慢指针相遇，此时将相遇节点标记为快指针
+    * 利用寻找链表倒数第n个题目的方式，将head节点作为慢指针节点，快慢相遇则为入口
+* 有环情况下推导
+  * 假定环外有a个节点，环内有b个节点，快指针在环内走了$n_1$次，漫指针在环内走了$n_2$次,入口距离相遇位置是d
+  * 快针走过节点数(慢指针的步数+n个环内步数)：公式1:$f=a+n_1b+d$
+  * 慢指针走过节点数: 公式2:$s=a+n_2b+d$
+  * 所以公式3:$f-s = (n_1-n2)b$
+  * 又因为公式4：$f=2s$, 所以公式5:$s=(n_1-n_2)b$
+  * 有公式2和公式5可知$a+d =(n^1)b$
+  * 也就是慢指针从环的入口处在转一圈走过的距离 = 从初始节点到环入口的距离
+* 代码如下
+```java
+public ListNode detectCycle(ListNode head) {
+    if (head == null || head.next == null) {
+        return null;
+    }
+    ListNode slow = head, fast = head;
+    while (null != fast) {
+        fast = fast.next;
+        if (null == fast) {
+            return null;
+        }
+        fast = fast.next;
+
+        slow = slow.next;
+
+        if (fast == slow) {
+            break;
+        }
+    }
+    if (null == fast) {
+        return null;
+    }
+
+    slow = head;
+    while (slow != fast) {
+        slow = slow.next;
+        fast = fast.next;
+    }
+    return fast;
+}
+```
+
+### 1.14 HOT100-LC152-数组的最大乘积
+* 题目描述
+  * 给你一个整数数组 nums ，请你找出数组中乘积最大的非空连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。
+* 做法
+  * 动态规划
+* 动态规划
+  * 连续乘积可以有过程中的正数得来，也可以右过程中的负数得来
+  * 故定义两个dp数组，max[]和min[]
+  * $nums[i]>=0$ 时：$max[i] = Math.max(max[i-1]*nums[i],nums[i])$，$min[i] = Math.min(min[i-1]*nums[i],nums[i])$
+  * $nums[i]<0$ 时：$max[i] = Math.max(min[i-1]*nums[i],nums[i])$,，$min[i] = Math.min(max[i-1]*nums[i],nums[i])$
+  * 同时对比max[i]和最大值即可
+* 代码如下
+```java
+public int maxProduct(int[] nums) {
+    int positive = nums[0];
+    int negative = nums[0];
+    int result = nums[0];
+    for (int i = 1; i < nums.length; i++) {
+        if (nums[i] >= 0) {
+            positive = Math.max(nums[i], positive * nums[i]);
+            negative = Math.min(nums[i], negative * nums[i]);
+        }
+        if (nums[i] < 0) {
+            int negative1 = negative;
+            int positive1 = positive;
+            positive = Math.max(negative1 * nums[i], nums[i]);
+            negative = Math.min(positive1 * nums[i], nums[i]);
+        }
+
+        result = Math.max(result, positive);
+    }
+
+    return result;
+}
+```
+
+
 
 ## 2.ByteDance
