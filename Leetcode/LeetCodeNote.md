@@ -23,6 +23,8 @@
     - [1.14 HOT100-LC152-数组的最大乘积](#114-hot100-lc152-数组的最大乘积)
     - [1.15-HOT100-LC287-寻找重复数](#115-hot100-lc287-寻找重复数)
     - [1.16 HOT100-LC437-二叉树路径总和](#116-hot100-lc437-二叉树路径总和)
+    - [1.17 HOT100-LC581-最短无序连续子数组](#117-hot100-lc581-最短无序连续子数组)
+    - [1.18 HOT100-LC312-戳气球](#118-hot100-lc312-戳气球)
   - [2.ByteDance](#2bytedance)
 
 ## 0、基础算法
@@ -1193,5 +1195,84 @@ public int findDuplicate(int[] nums) {
         return result;
     }
   ```
+
+### 1.17 HOT100-LC581-最短无序连续子数组
+* 题目描述
+  * 给定一个整数数组 nums ，你需要找出一个 连续子数组 ，如果对这个子数组进行升序排序，那么整个数组都会变为升序排序。
+* 大致思路
+  * 可以寻找每个数左侧第一个比它小的元素的位置，在此基础上找到最靠近左侧的位置即可。
+  * 同理可以寻找每个数右侧第一个比它大的元素的位置，在此基础上找到最靠近右的位置
+  * 这两个之间的子数组就是所要求的
+* 证明
+  * 这道题需要做到两点，找到破坏增序和降序的节点，然后把这个区间的最小最大值分别移动到规定位置
+* 代码
+  ```java
+    public int findUnsortedSubarray(int[] nums) {
+    Stack<Integer> stack = new Stack<>();
+    int l = nums.length;
+    int r = 0;
+    for (int i = 0; i < nums.length; i++) {
+        while (!stack.isEmpty() && nums[stack.peek()] > nums[i]) {
+            l = Math.min(l, stack.pop());
+            r = Math.max(r, i);
+        }
+        stack.push(i);
+    }
+    stack.clear();
+    for (int i = nums.length - 1; i >= 0; i--) {
+        while (!stack.isEmpty() && nums[stack.peek()] < nums[i]) {
+            r = Math.max(r, stack.pop());
+        }
+        stack.push(i);
+    }
+
+    if (l == nums.length && r == 0) {
+        return 0;
+    }
+
+    return r - l + 1;
+  }
+  ```
+### 1.18 HOT100-LC312-戳气球
+* 题目描述
+  * 有 n 个气球，编号为0 到 n - 1，每个气球上都标有一个数字，这些数字存在数组 nums 中。
+  * 现在要求你戳破所有的气球。戳破第 i 个气球，你可以获得 nums[i - 1] * nums[i] * nums[i + 1] 枚硬币。 这里的 i - 1和 i + 1 代表和 i 相邻的两个气球的序号。如果 i - 1或 i + 1 超出了数组的边界，那么就当它是一个数字为 1 的气球。
+  * 求所能获得硬币的最大数量。
+* 解题思路-动态规划
+  * 定义dp，dp[i][j]-->代表了(i,j)开区间内可以戳破的数量
+  * 转移方程，假设k在(i,j)之间，且其为最后一个被戳爆的气球，那么dp[i][j]可以由dp[i][k]和dp[k][j]转移而来
+    * $dp[i][j] = dp[i][k] + val[i]*val[k]*val[j] + dp[k][j]$
+  * 依次将范围从小到大，即可以依次扩大k的区间，(i,j)的范围，则从转移方程中获取到最大值就可以
+  * 根据题目，也要将原数组扩大，以贴合首位的情况
+* 代码
+```java
+public int maxCoins(int[] nums) {
+    int n = nums.length;
+    // 创建一个辅助数组，并在首尾各添加1，方便处理边界情况
+    int[] temp = new int[n + 2];
+    temp[0] = 1;
+    temp[n + 1] = 1;
+    for (int i = 0; i < n; i++) {
+        temp[i + 1] = nums[i];
+    }
+    int[][] dp = new int[n + 2][n + 2];
+    // len表示开区间长度
+    for (int len = 3; len <= n + 2; len++) {
+        // i表示开区间左端点
+        for (int i = 0; i <= n + 2 - len; i++) {
+            int j = i + len - 1;
+            int res = dp[i][j];
+            // k为开区间内的索引
+            for (int k = i + 1; k < j; k++) {
+                int left = dp[i][k];
+                int right = dp[k][j];
+                res = Math.max(res, left + temp[i] * temp[k] * temp[j] + right);
+            }
+            dp[i][j] = res;
+        }
+    }
+    return dp[0][n + 1];
+}
+```
 
 ## 2.ByteDance
