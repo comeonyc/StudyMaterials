@@ -22,6 +22,7 @@
     - [1.13 HOT100-LC142-环形链表(找到环入口)](#113-hot100-lc142-环形链表找到环入口)
     - [1.14 HOT100-LC152-数组的最大乘积](#114-hot100-lc152-数组的最大乘积)
     - [1.15-HOT100-LC287-寻找重复数](#115-hot100-lc287-寻找重复数)
+    - [1.16 HOT100-LC437-二叉树路径总和](#116-hot100-lc437-二叉树路径总和)
   - [2.ByteDance](#2bytedance)
 
 ## 0、基础算法
@@ -1118,6 +1119,79 @@ public int findDuplicate(int[] nums) {
     return slow;
 }
 ```
+### 1.16 HOT100-LC437-二叉树路径总和
+* 题目描述
+  * 给定一个二叉树的根节点 root ，和一个整数 targetSum ，求该二叉树里节点值之和等于 targetSum 的 路径 的数目。
+  * 路径 不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。
+* 解题思路
+  * 深度优先搜索
+  * 前缀和
+* 深度优先搜索
+  * 过程：
+    * 前序遍历，记录当前的路径
+    * 遍历到节点时，从后往前计算路径和，看是否等于target，如果相等记录起来
+    * 然后搜索左子树和右子树，累加相应的结果即可。
+  * 代码：
+  ```java
+   public int pathSum(TreeNode root, int targetSum) {
+       return dfs(root,new ArrayList<>(),targetSum);
+    }
 
+    private int dfs(TreeNode root, List<Integer> paths, Integer target) {
+        if (root == null) {
+            return 0;
+        }
+
+        paths.add(root.val);
+        int result = 0;
+        long sum = 0;
+        for (int j = paths.size() - 1; j >= 0; j--) {
+            sum += paths.get(j);
+            if (sum == target) {
+                result++;
+            }
+        }
+        result += dfs(root.left, paths, target);
+        result += dfs(root.right, paths, target);
+
+        paths.remove(paths.size() - 1);
+        return result;
+    }
+  ```
+* 前缀和
+  * 过程
+    * 维护一个前缀和，记录当前和在之前有多少个情况
+    * 当遍历到当前节点时，判断当前和减去目标值在前缀和中是否有记录，若有，则说明符合目标情况 $prefixMap.contains(currentSum-target)$
+    * 然后遍历左右子树，将结果做累加
+    * 核心点：在这个遍历完后，要恢复一下状态，也就是把这个元素对应的前缀和删除，因为后续的过程不会涉及到该节点
+  * 代码
+  ```java
+  public int pathSum(TreeNode root, int targetSum) {
+        Map<Long, Integer> prefixMap = new HashMap<>();
+        prefixMap.put(0L, 1);
+        return recursion(root, prefixMap, targetSum, 0l);
+    }
+
+
+    private int recursion(TreeNode root, Map<Long, Integer> prefixMap, int target, long currentSum) {
+        if (root == null) {
+            return 0;
+        }
+
+        int result = 0;
+        currentSum += root.val;
+        if (prefixMap.containsKey(currentSum - target)) {
+            result += prefixMap.get(currentSum - target);
+        }
+        prefixMap.put(currentSum, prefixMap.getOrDefault(currentSum, 0) + 1);
+
+        result += recursion(root.left, prefixMap, target, currentSum);
+        result += recursion(root.right, prefixMap, target, currentSum);
+
+        prefixMap.put(currentSum, prefixMap.get(currentSum) - 1);
+
+        return result;
+    }
+  ```
 
 ## 2.ByteDance
