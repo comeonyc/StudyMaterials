@@ -253,8 +253,8 @@ public int lengthOfLongestSubstring(String s) {
   * m1的寻找可以用二分法来排除，如下所示
     * 让left指向nums1的头部，让right指向num2的尾部
     * 取 **m1 = left+(rigt-left)/2** , 则 **m2=k-m1**
-    * 如果nums1[m1]<nums[m2],那么可以说明nums1数组的前m1的元素都是在前k大的数中，**不是第k大的那个数**，此时要让left=m1+1
-    * 相反如果nums[m1]>=nums[m2],说明要在细化的看一下(left~m1)之间的区间，没办法直接排除，此时令right=m1即可
+    * 如果nums1[m1]<=nums[m2],那么可以说明nums1数组的前m1的元素都是在前k大的数中，**不是第k大的那个数**，此时要让left=m1+1
+    * 相反如果nums[m1]>nums[m2],说明要在细化的看一下(left~m1)之间的区间，没办法直接排除，此时令right=m1即可
     * 如果m2的长度超过了数组的长度，则说明nums1中的元素取的不够，要多取一些，令left=m1+1
   * 最后从m1取几个元素，从m2中取几个元素就确定了
     * 如果m1=0，则说明m1中的元素过大，不包含第k大，要从nums2中取
@@ -285,11 +285,11 @@ public int findK(int[] nums1, int[] nums2, int k) {
     int left = 0;
     int right = len1;
     while (left < right) {
-        int m1 = left + (right - left) / 2;
+        int m1 = (right + left) / 2;
         int m2 = k - m1;
         if (m2 > len2) {
             left = m1 + 1;
-        } else if (nums1[m1] <= nums2[m2 - 1]) {
+        } else if (nums1[m1] < nums2[m2 - 1]) {
             left = m1 + 1;
         } else {
             right = m1;
