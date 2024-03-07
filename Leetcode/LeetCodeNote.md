@@ -26,6 +26,7 @@
     - [1.17 HOT100-LC581-最短无序连续子数组](#117-hot100-lc581-最短无序连续子数组)
     - [1.18 HOT100-LC312-戳气球](#118-hot100-lc312-戳气球)
   - [2.ByteDance](#2bytedance)
+    - [2.1 ByteDance-LC135-分发糖果](#21-bytedance-lc135-分发糖果)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -646,6 +647,8 @@ private void swap(int[] nums, int a, int b) {
   * 定理二：判断顺序区间还是乱序区间，只需要对比 left 和 right 是否是顺序对即可，nums[left] <= nums[right]，顺序区间，否则乱序区间。
   * 定理三：每次二分都会至少存在一个顺序区间
   * 通过不断的用Mid二分，根据定理二，将整个数组划分成顺序区间和乱序区间，然后利用定理一判断target是否在顺序区间，如果在顺序区间，下次循环就直接取顺序区间，如果不在，那么下次循环就取乱序区间。
+* 小提示
+  * 该题大致思路如上，但是要注意边界条件，如果用left和middle来比较数组升序和降序时，当left和right相邻时，要记住二分取值的点是left,所以比较时要$nums[left]<=nums[middle]$,保障范围
 * 代码
 ```java
 public int search(int[] nums, int target) {
@@ -1276,3 +1279,50 @@ public int maxCoins(int[] nums) {
 ```
 
 ## 2.ByteDance
+### 2.1 ByteDance-LC135-分发糖果
+* 题目描述
+  * n 个孩子站成一排。给你一个整数数组 ratings 表示每个孩子的评分。
+  * 你需要按照以下要求，给这些孩子分发糖果：
+    * 每个孩子至少分配到 1 个糖果。
+    * 相邻两个孩子评分更高的孩子会获得更多的糖果。
+    * 请你给每个孩子分发糖果，计算并返回需要准备的 最少糖果数
+* 解题思路
+  * 遵循左右两个规则，假定学生A和学生B左右相邻，且A在B左边
+    * 左规则：$ratings_B > ratings_A$时, B的糖果比A的糖果多
+    * 右规则：$ratings_A > ratings_B$时, A的糖果比B糖果多
+  * 基于此可以将算法分成左右两部分
+    * 首先从左到右遍历，如果$ratings_i > ratings_{i-1}$,则$left[i] = left[i-1]+1$,否则$left[i]=1$
+    * 然后从右到左遍历，如果$ratings_i > ratings_{i+1}$,则$right[i] = right[i-1]+1$,否则$right[i]=1$
+    * 最后利用贪心取left[i]和right[i]的最大值就可以
+* 代码如下
+  ```java
+  public int candy(int[] ratings) {
+      if (null == ratings || ratings.length == 0) {
+          return 0;
+      }
+      int nums = ratings.length;
+      int[] left = new int[nums];
+      int[] right = new int[nums];
+      for (int i = 0; i < nums; i++) {
+          if (i - 1 >= 0 && ratings[i] > ratings[i - 1]) {
+              left[i] = left[i - 1] + 1;
+          } else {
+              left[i] = 1;
+          }
+      }
+
+      for (int i = nums - 1; i >= 0; i--) {
+          if (i + 1 < nums && ratings[i] > ratings[i + 1]) {
+              right[i] = right[i + 1] + 1;
+          } else {
+              right[i] = 1;
+          }
+      }
+
+      int count = 0;
+      for (int i = 0; i < nums; i++) {
+          count += Math.max(left[i], right[i]);
+      }
+      return count;
+  }
+  ```
