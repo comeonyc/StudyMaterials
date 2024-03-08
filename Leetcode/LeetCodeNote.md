@@ -30,6 +30,7 @@
     - [2.2  ByteDance-LC115-不同的子序列](#22--bytedance-lc115-不同的子序列)
     - [2.3 ByteDance-LC376-摆动序列](#23-bytedance-lc376-摆动序列)
     - [2.4 ByteDance-LC213-打家劫舍二](#24-bytedance-lc213-打家劫舍二)
+    - [2.5 ByteDance-LCR170-交易逆序对的总数](#25-bytedance-lcr170-交易逆序对的总数)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -1439,6 +1440,52 @@ public int maxCoins(int[] nums) {
             notSteal = Math.max(tmp, notSteal);
         }
         return Math.max(steal, notSteal);
+    }
+  ```
+### 2.5 ByteDance-LCR170-交易逆序对的总数
+* 题目描述
+  * 在股票交易中，如果前一天的股价高于后一天的股价，则可以认为存在一个「交易逆序对」。请设计一个程序，输入一段时间内的股票交易记录 record，返回其中存在的「交易逆序对」总数。
+* 解题思路
+  * 归并排序
+    * 利用分治的思想，在每次子范围的排序中统计自身的逆序对，然后在对比两个结果间的逆序对即可
+* 代码
+  ```java
+  public int reversePairs(int[] record) {
+        return mergeSort(record, 0, record.length - 1);
+    }
+
+    private int mergeSort(int[] record, int left, int right) {
+        if (left >= right) {
+            return 0;
+        }
+
+        int middle = (left + right) / 2;
+        // 分
+        int result = mergeSort(record, left, middle) + mergeSort(record, middle + 1, right);
+        // 治
+        int[] tmp = new int[right - left + 1];
+        int index1 = left, index2 = middle + 1, index = 0;
+        while (index1 <= middle && index2 <= right) {
+            if (record[index1] <= record[index2]) {
+                tmp[index++] = record[index1++];
+            } else {
+                result += (middle - index1 + 1);
+                tmp[index++] = record[index2++];
+            }
+        }
+
+        while (index1 <= middle) {
+            tmp[index++] = record[index1++];
+        }
+
+        while (index2 <= right) {
+            tmp[index++] = record[index2++];
+        }
+
+        for (int i = 0; i < tmp.length; i++) {
+            record[left + i] = tmp[i];
+        }
+        return result;
     }
   ```
 
