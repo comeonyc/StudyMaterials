@@ -27,6 +27,9 @@
     - [1.18 HOT100-LC312-戳气球](#118-hot100-lc312-戳气球)
   - [2.ByteDance](#2bytedance)
     - [2.1 ByteDance-LC135-分发糖果](#21-bytedance-lc135-分发糖果)
+    - [2.2  ByteDance-LC115-不同的子序列](#22--bytedance-lc115-不同的子序列)
+    - [2.3 ByteDance-LC376-摆动序列](#23-bytedance-lc376-摆动序列)
+    - [2.4 ByteDance-LC213-打家劫舍二](#24-bytedance-lc213-打家劫舍二)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -1326,3 +1329,117 @@ public int maxCoins(int[] nums) {
       return count;
   }
   ```
+### 2.2  ByteDance-LC115-不同的子序列
+* 题目描述
+  * 给两个字符串 s 和 t ，统计并返回在 s 的 子序列 中 t 出现的个数
+    * s = "rabbbit", t = "rabbit"
+* 解题思路
+  * 题目翻译下来就是在s中选字符以匹配t
+  * 所以可以用动态规划
+    * 当S[i] != T[j]时，那么出现个数不变，dp自然延续前一个值，即dp[i][j] = dp[i-1][j]
+    * 当S[j] == T[i]时，那么这个时候，需要计算的出现个数来自于两个部分：
+      * 使用新加入的这个元素去匹配，此时的个数为dp[i-1][j-1]
+      * 不使用新加入的这个元素去匹配，此时的个数为dp[i-1][j]
+  * 作为初始值
+    * 假如t为空串，那么整个s只有什么都不选才可以满足，所以dp[i][0] = 1;
+    * 当s为空串，那么不可能有这个序列能满足t,所以dp[0][i] = 0
+* 代码
+  ```java
+  public int numDistinct(String s, String t) {
+      int sl = s.length();
+      int tl = t.length();
+      int[][] dp = new int[sl + 1][tl + 1];
+      // init
+      for (int i = 0; i <= sl; i++) {
+          dp[i][0] = 1;
+      }
+      
+      for (int i = 1; i <= sl; i++) {
+          for (int j = 1; j <= tl; j++) {
+              if (s.charAt(i - 1) == t.charAt(j - 1)) {
+                  dp[i][j] = dp[i - 1][j] + dp[i - 1][j - 1];
+              } else {
+                  dp[i][j] = dp[i - 1][j];
+              }
+          }
+      }
+      return dp[sl][tl];
+  }
+  ```
+### 2.3 ByteDance-LC376-摆动序列
+* 题目描述
+  * 如果连续数字之间的差严格地在正数和负数之间交替，则数字序列称为 摆动序列 。第一个差（如果存在的话）可能是正数或负数。仅有一个元素或者含两个不等元素的序列也视作摆动序列。例如， [1, 7, 4, 9, 2, 5] 是一个 摆动序列 ，因为差值 (6, -3, 5, -7, 3) 是正负交替出现的。
+* 解题思路
+  * 动态规划
+    * 定义两个数组up和down
+      * 其中up[i]描述的是(i-1,i)是上升趋势，down[i]描述的是(i-1,i)是下降趋势
+      * 当$nums[i]>nums[i-1]$,则$up[i]=Math.max(down[i-1]+1,up[i-1])$，此时$down[i]=down[i-1]$
+      * 当$nums[i]<nums[i-1]$,则$down[i]=Math.max(up[i-1]+1,down[i-1])$,此时$up[i]=up[i-1]$
+      * 当$nums[i]=nums[i-1]$,则$up[i]=up[i-1]$，此时$down[i]=down[i-1]$
+* 代码如下
+  ```java
+  public int wiggleMaxLength(int[] nums) {
+      if (null == nums || nums.length == 0) {
+          return 0;
+      }
+      int len = nums.length;
+      int[] up = new int[len];
+      int[] down = new int[len];
+      up[0] = 1;
+      down[0] = 1;
+      for (int i = 1; i < len; i++) {
+          if (nums[i] > nums[i - 1]) {
+              up[i] = down[i - 1] + 1;
+          } else if (nums[i] < nums[i - 1]) {
+              down[i] = up[i - 1] + 1;
+          } else {
+              up[i] = up[i - 1];
+              down[i] = down[i - 1];
+          }
+      }
+      return Math.max(up[len - 1], down[len - 1]);
+  }
+  ```
+### 2.4 ByteDance-LC213-打家劫舍二
+* 题目描述
+  * 你是一个专业的小偷，计划偷窃沿街的房屋，每间房内都藏有一定的现金。这个地方所有的房屋都 围成一圈 ，这意味着第一个房屋和最后一个房屋是紧挨着的。同时，相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警 。
+  * 给定一个代表每个房屋存放金额的非负整数数组，计算你 在不触动警报装置的情况下 ，今晚能够偷窃到的最高金额。
+* 解题思路
+  * 此题的关键点在于首尾是相连的
+  * 那么如果偷nums[0],nums[1]和nums[n-1]是不能偷的，则考虑[2,n-2]之间的非相连的偷取最大数即可
+  * 如果不偷nums[0],则关注[1,n-1]之间偷取的最大数即可
+* 代码
+  ```java
+  public int rob(int[] nums) {
+        if (null == nums || nums.length == 0) {
+            return 0;
+        }
+        if (nums.length == 1) {
+            return nums[0];
+        }
+        if (nums.length == 2) {
+            return Math.max(nums[0], nums[1]);
+        }
+        int len = nums.length;
+
+        // rot 0
+        return Math.max(nums[0] + rob(nums, 2, len - 2), rob(nums, 1, len - 1));
+    }
+
+    private int rob(int[] nums, int left, int right) {
+        if (left > right) {
+            return 0;
+        }
+        int steal = nums[left];
+        int notSteal = 0;
+
+        for (int i = left + 1; i <= right; i++) {
+            int tmp = steal;
+            steal = notSteal + nums[i];
+            notSteal = Math.max(tmp, notSteal);
+        }
+        return Math.max(steal, notSteal);
+    }
+  ```
+
+
