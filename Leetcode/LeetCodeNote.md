@@ -31,6 +31,8 @@
     - [2.3 ByteDance-LC376-摆动序列](#23-bytedance-lc376-摆动序列)
     - [2.4 ByteDance-LC213-打家劫舍二](#24-bytedance-lc213-打家劫舍二)
     - [2.5 ByteDance-LCR170-交易逆序对的总数](#25-bytedance-lcr170-交易逆序对的总数)
+    - [2.6 ByteDance-LC92-反转链表92](#26-bytedance-lc92-反转链表92)
+    - [2.7 ByteDance-LC516-最长回文序列](#27-bytedance-lc516-最长回文序列)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -1488,5 +1490,98 @@ public int maxCoins(int[] nums) {
         return result;
     }
   ```
+### 2.6 ByteDance-LC92-反转链表92
+* 题目描述
+  * 给定链表和left及right，反转left～right之间
+* 难点
+  * 分别确定并记录三段
+* 代码
+  ```java
+  public ListNode reverseBetween(ListNode head, int left, int right) {
+      if(left == right){
+          return head;
+      }
+      int index = 1;
 
+      ListNode result = null;
+      ListNode node = head;
+      ListNode firstEnd = null;
+      // 寻找翻转起始
+      while (index < left) {
+          firstEnd = node;
+          node = node.next;
+          index++;
+      }
+      // 确立结果节点
+      if (firstEnd != null) {
+          result = head;
+          firstEnd.next = null;
+      }
+
+      // 中间链表反转
+      ListNode tmp = null;
+      ListNode start = null;
+      while (index <= right) {
+          ListNode next = node.next;
+          node.next = tmp;
+          if (start == null) {
+              start = node;
+          }
+          tmp = node;
+          node = next;
+          index++;
+      }
+
+      // 第一段、第二段关联
+      if (firstEnd != null) {
+          firstEnd.next = tmp;
+      }
+      
+      //第二段、第三段关联
+      if(start != null){
+          start.next = node;
+      }
+      
+      // 确定结果
+      if (result == null) {
+          result = tmp;
+      }
+
+      return result;
+  }
+  ```
+### 2.7 ByteDance-LC516-最长回文序列
+* 题目描述
+  * 给你一个字符串 s ，找出其中最长的回文子序列，并返回该序列的长度。
+* 解题思路
+  * 动态规划
+    * 定义dp[j][i],描述的时j～i之间的最长回文序列
+    * 当$s[i]=s[j]$时
+      * $i==j$,$dp[j][i]=1$; 
+      * $i-j==1$,$dp[j][i]=2$;
+      * $dp[j][i]=dp[j+1][i-1]+2$;
+    * 否则，**i,j同时作为首尾不是回文序列**
+      * $dp[j][i] = Math.max(dp[j+1][i],dp[j][i-1])$;
+* 代码
+  ```java
+  public int longestPalindromeSubseq(String s) {
+      int[][] dp = new int[s.length()][s.length()];
+      for (int i = 0; i < s.length(); i++) {
+          for (int j = i; j >= 0; j--) {
+              if (s.charAt(j) == s.charAt(i)) {
+                  if (j == i) {
+                      dp[j][i] = 1;
+                  } else if (i - j == 1) {
+                      dp[j][i] = 2;
+                  } else {
+                      dp[j][i] = dp[j + 1][i - 1] + 2;
+                  }
+              } else {
+                  dp[j][i] = Math.max(dp[j + 1][i], dp[j][i - 1]);
+              }
+          }
+      }
+      return dp[0][s.length() - 1];
+  }
+  ```
 
