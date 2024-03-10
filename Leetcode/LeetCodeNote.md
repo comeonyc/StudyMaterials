@@ -33,6 +33,8 @@
     - [2.5 ByteDance-LCR170-交易逆序对的总数](#25-bytedance-lcr170-交易逆序对的总数)
     - [2.6 ByteDance-LC92-反转链表92](#26-bytedance-lc92-反转链表92)
     - [2.7 ByteDance-LC516-最长回文序列](#27-bytedance-lc516-最长回文序列)
+    - [2.8 ByteDance- LC69-x的平方根](#28-bytedance--lc69-x的平方根)
+    - [2.9 ByteDance-LC68-文本左右对齐](#29-bytedance-lc68-文本左右对齐)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -1583,5 +1585,119 @@ public int maxCoins(int[] nums) {
       }
       return dp[0][s.length() - 1];
   }
+  ```
+### 2.8 ByteDance- LC69-x的平方根
+* 题目描述
+  * 给你一个非负整数 x ，计算并返回 x 的 算术平方根 。
+  * 由于返回类型是整数，结果只保留 整数部分 ，小数部分将被 舍去 。
+  * 不允许使用内置函数
+* 解题思路
+  * 二分法
+    * 每次取left～right 中间值的平方数，如果比x小，就有可能成为结果，如果比x大，则进行调整即可
+* 代码
+  ```java
+  public int mySqrt(int x) {
+      int l = 0, r = x;
+      int result = -1;
+      while (l <= r) {
+          int mid = (l + r) >>> 1;
+          if ((long) mid * mid <= x) {
+              result = mid;
+              l = mid + 1;
+          } else {
+              r = mid - 1;
+          }
+
+      }
+      return result;
+  }
+  ```
+### 2.9 ByteDance-LC68-文本左右对齐
+* 题目描述
+  * 给定一个单词数组 words 和一个长度 maxWidth ，重新排版单词，使其成为每行恰好有 maxWidth 个字符，且左右两端对齐的文本。
+  * 要求尽可能均匀分配单词间的空格数量。如果某一行单词间的空格不能均匀分配，则左侧放置的空格数要多于右侧的空格数。
+  * 文本的最后一行应为左对齐，且单词之间不插入额外的空格。
+* 解题思路
+  * 贪心，尽可能让每一行有更多的字符，直至包含的字符长度+字符间的空格小于
+  * 如果是最后一行或者这一行只有一个单词，只需要在后面补充空格即可
+  * 如果不是的话
+    * 计算补充一下能放置空格的地方
+    * 以及还需要补充多少个空格
+    * 计算出每个空格地方需要补充补充的额外空格
+    * 每次补充额外空格数，然后在多加一个空格，直至空格数满足长度即可
+* 代码
+  ```java
+  public List<String> fullJustify(String[] words, int maxWidth) {
+        List<String> result = new ArrayList<>();
+
+        int n = words.length;
+
+        List<String> current = new ArrayList<>();
+        for (int i = 0; i < n;) {
+            current.clear();
+            current.add(words[i]);
+            int length = words[i].length();
+            i++;
+            while (i < n && length + 1 + words[i].length() <= maxWidth) {
+                length = length + 1 + words[i].length();
+                current.add(words[i]);
+                i++;
+            }
+
+            if (i == n) {
+                // 当前是最后一行-->左对齐，跳出循环
+                String collect = String.join(" ", current);
+                int remain = maxWidth - collect.length();
+                for (int j = 0; j < remain; j++) {
+                    collect += " ";
+                }
+                result.add(collect);
+                break;
+            }
+
+            if (current.size() == 1) {
+                // 当前行只有一个字符串 --> 左对齐
+                String str = current.get(0);
+                if (str.length() > maxWidth) {
+                    throw new IllegalArgumentException("无法满足");
+                }
+                int remain = maxWidth - str.length();
+                for (int j = 0; j < remain; j++) {
+                    str += " ";
+                }
+                result.add(str);
+                continue;
+            }
+
+            int wordCnt = current.size();
+            // 能放置空格的地方
+            int spacePlaceNumber = wordCnt - 1;
+            // 还需要补充多少个空格
+            int remainSpaceNumber = maxWidth - (length);
+            // 平均每个地方放几个空格
+            int avg = remainSpaceNumber / spacePlaceNumber;
+            int alreadyFillSpaceNumber = 0;
+            StringBuilder sb = new StringBuilder();
+            for (int j = 0; j < wordCnt; j++) {
+                sb.append(current.get(j));
+                if (j == wordCnt - 1)
+                    break;
+
+                // 补齐必要的空格
+                sb.append(" ");
+                for (int k = 0; k < avg; k++) {
+                    sb.append(" ");
+                }
+                if (spacePlaceNumber * avg + alreadyFillSpaceNumber < remainSpaceNumber) {
+                    sb.append(" ");
+                    alreadyFillSpaceNumber++;
+                }
+            }
+            result.add(sb.toString());
+
+        }
+
+        return result;
+    }
   ```
 
