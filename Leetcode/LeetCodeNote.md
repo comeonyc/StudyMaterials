@@ -35,6 +35,9 @@
     - [2.7 ByteDance-LC516-最长回文序列](#27-bytedance-lc516-最长回文序列)
     - [2.8 ByteDance- LC69-x的平方根](#28-bytedance--lc69-x的平方根)
     - [2.9 ByteDance-LC68-文本左右对齐](#29-bytedance-lc68-文本左右对齐)
+    - [2.7 ByteDance-LC2262-字符串的总引力](#27-bytedance-lc2262-字符串的总引力)
+    - [2.8 ByteDance-LC386-字段序排数](#28-bytedance-lc386-字段序排数)
+    - [2.9 ByteDance-LC670-最大交换](#29-bytedance-lc670-最大交换)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -1700,4 +1703,143 @@ public int maxCoins(int[] nums) {
         return result;
     }
   ```
+### 2.7 ByteDance-LC2262-字符串的总引力
+* 题目描述
+  * 字符串的 引力 定义为：字符串中 不同 字符的数量。
+  * 输入：s = "code"
+  * 输出：20
+  * 解释："code" 的子字符串有：
+    * 长度为 1 的子字符串："c"、"o"、"d"、"e" 的引力分别为 1、1、1、1 ，总和为 4 。
+    * 长度为 2 的子字符串："co"、"od"、"de" 的引力分别为 2、2、2 ，总和为 6 。
+    * 长度为 3 的子字符串："cod"、"ode" 的引力分别为 3、3 ，总和为 6 。
+    * 长度为 4 的子字符串："code" 的引力为 4 ，总和为 4 。
+    * 引力总和为 4 + 6 + 6 + 4 = 20 。
+* 解题方案
+  * 暴力
+  * dp思想
+* 暴力方案
+  * 依次遍历[0-i]的度，累加和
+  * 代码
+  ```java
+  public long appealSum(String s) {
+      int len = s.length();
+      Set<Character> set = new HashSet<>();
+      long result = 0;
+      for (int i = 0; i < len; i++) {
+          set.clear();
+          for (int j = i; j >= 0; j--) {
+              set.add(s.charAt(j));
+              result += set.size();
+          }
+      }
+      return result;
+  }
+  ```
+* dp思想
+  * 分类讨论：
+    * 如果 s[i] 之前没有遇到过，那么这些子串的引力值都会增加 1，这些子串的引力值之和会增加 i，再加上 1，即 s[i]单独组成的子串的引力值；
+    * 如果 s[i]之前遇到过，设其上次出现的下标为 j，
+      * 那么向子串 s[0..i−1], s[1..i−1], s[2..i−1],⋯ ,s[j..i−1]的末尾添加 s[i]后，这些子串的引力值是不会变化的，因为 s[i]已经在 s[j]处出现过了；
+      * 而子串 s[j+1..i−1], s[j+2..i−1],⋯ ,s[i−1..i−1]s[j+1..i-1], s[j+2..i-1]由于不包含字符 s[i]，这些子串的引力值都会增加 1，因此有 i-j-1 个子串的引力值会增加 1，这些子串的引力值之和会增加 i−j−1，再加上 1，即 s[i]单独组成的子串的引力值。
+  * 模拟上述过程，遍历 s 的过程中用一个变量 sumG维护以 s[i]结尾的子串的引力值之和，同时用一个数组或哈希表 pos 记录每个字符上次出现的下标。
+  * 代码
+  ```java
+  public long appealSum(String s) {
+      long result = 0;
+      int[] pos = new int[26];
+      Arrays.fill(pos, -1);
+      int sumG = 0;
+      char[] charArray = s.toCharArray();
+      for (int i = 0; i < charArray.length; i++) {
+          int last = pos[charArray[i] - 'a'];
+          sumG += i - last;
+          result += sumG;
+          pos[charArray[i] - 'a'] = i;
+      }
+      return result;
+  }
+  ```
+### 2.8 ByteDance-LC386-字段序排数
+* 题目描述
+  * 给你一个整数 n ，按字典序返回范围 [1, n] 内所有整数。
+  * 时间复杂度为 O(n) 且使用 O(1) 额外空间的算法。
+* 解题思路
+  * 依次从1～n作为起始搜索
+  * 依次*10，直至比n大p
+  * 在p处依次加1，直至比n大或者余数是9，则要/10,取搜索上一个字典序
+* 代码
+  ```java
+  public List<Integer> lexicalOrder(int n) {
+      List<Integer> list = new ArrayList<>();
+      int cnt = 0, i = 1;
+      while (cnt != n) {
+          list.add(i);
+          if (i * 10 <= n) {
+              i *= 10;
+          } else {
+              while (i % 10 == 9 || i == n) {
+                  i /= 10;
+              }
+              i++;
+          }
+          cnt++;
+      }
+      return list;
+  }
+  ```
+  或者dfs
+  ```java
+  public List<Integer> lexicalOrder(int n) {
+      List<Integer> result = new ArrayList<>();
+      for (int i = 1; i <= 9; i++)
+          dfs(i, n, result);
+      return result;
+  }
+
+  private void dfs(int cur, int limit, List<Integer> result) {
+      if (cur > limit)
+          return; 
+      result.add(cur);
+      for (int i = 0; i <= 9; i++)
+          dfs(cur * 10 + i, limit,result);
+  }
+  ```
+### 2.9 ByteDance-LC670-最大交换
+* 题目描述
+  * 给定一个非负整数，你至多可以交换一次数字中的任意两位。返回你能得到的最大值。
+* 题目分析
+  * 如果是整体将序排序，没有这样的数
+  * 所以可以利用贪心的思想，**从右边取最大的数，跟最靠近左边比它小的数交换即可**
+  * 从右往左遍历
+    * 如果当前数比最大的数要大，则它要成为交换的候选人
+    * 如果当前数比最小的数要小，可以记录当前的位置以及最大候选者的位置
+* 代码
+  ```java
+  public int maximumSwap(int num) {
+      char[] arr = String.valueOf(num).toCharArray();
+      int n = arr.length;
+
+      int index1 = -1, index2 = -1;
+      int maxIndex = n - 1;
+      for (int i = n - 1; i >= 0; i--) {
+          if (arr[i] > arr[maxIndex]) {
+              maxIndex = i;
+          } else if (arr[i] < arr[maxIndex]) {
+              index1 = i;
+              index2 = maxIndex;
+          }
+      }
+
+      if (index1 == -1) {
+          return num;
+      }
+
+      char tmpVal = arr[index1];
+      arr[index1] = arr[index2];
+      arr[index2] = tmpVal;
+
+      return Integer.parseInt(new String(arr));
+  }
+  ```
+
 
