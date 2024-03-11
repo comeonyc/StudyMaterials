@@ -38,6 +38,8 @@
     - [2.7 ByteDance-LC2262-字符串的总引力](#27-bytedance-lc2262-字符串的总引力)
     - [2.8 ByteDance-LC386-字段序排数](#28-bytedance-lc386-字段序排数)
     - [2.9 ByteDance-LC670-最大交换](#29-bytedance-lc670-最大交换)
+    - [2.10 ByteDance-LC402-移掉K位数字](#210-bytedance-lc402-移掉k位数字)
+    - [2.11 ByteDance-LC306-累加数](#211-bytedance-lc306-累加数)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -1839,6 +1841,100 @@ public int maxCoins(int[] nums) {
       arr[index2] = tmpVal;
 
       return Integer.parseInt(new String(arr));
+  }
+  ```
+### 2.10 ByteDance-LC402-移掉K位数字
+* 题目描述
+  * 给你一个以字符串表示的非负整数 num 和一个整数 k ，移除这个数中的 k 位数字，使得剩下的数字最小。
+  * 请你以字符串形式返回这个最小的数字。
+* 解题思路
+  * 利用单调递增栈
+  * 如果一个数是单调递增（高位递增）的，只能删除后面的几位数才能保障数字最大
+  * 如果一个数是高位递减的，那么尽可能删除左侧较大的数，则能让数字变小
+  * 故可以利用单调递增栈，利用波谷消灭掉波峰值
+* 代码如下
+  ```java
+  public String removeKdigits(String num, int k) {
+      char[] chars = num.toCharArray();
+      int index = 0;
+      Stack<Character> stack = new Stack<>();
+      for (; index < chars.length; index++) {
+          while (k > 0 && !stack.isEmpty() && chars[index] < stack.peek()) {
+              k--;
+              stack.pop();
+          }
+
+          if (chars[index] == '0' && stack.isEmpty()) {
+              continue;
+          }
+          stack.push(chars[index]);
+      }
+
+      while (k > 0 && !stack.isEmpty()) {
+          k--;
+          stack.pop();
+      }
+
+      if (stack.isEmpty()) {
+          return "0";
+      }
+
+      StringBuilder sb = new StringBuilder();
+      while (!stack.isEmpty()) {
+          sb.insert(0, stack.pop());
+      }
+      return sb.toString();
+  }
+  ```
+### 2.11 ByteDance-LC306-累加数
+* 题目描述
+  * 累加数 是一个字符串，组成它的数字可以形成累加序列。
+  * 一个有效的 累加序列 必须 至少 包含 3 个数。除了最开始的两个数以外，序列中的每个后续数字必须是它之前两个数字之和。
+* 解题思路
+  * dfs
+  * 整体有三个数比较关键
+    * 前两个数，前一个数，当前数
+    * 分别用这三个数，来做递归
+* 代码
+  ```java
+  long max = (Long.MAX_VALUE - 9) / 10L;
+
+  public boolean isAdditiveNumber(String num) {
+      if (num.length() < 3)
+          return false;
+      return dfs(num, 0, -1, -1, -1);
+  }
+
+  public boolean dfs(String num, int index, long first, long second, long cur) {
+      if (index == num.length())
+          return first + second == cur;
+      int val = num.charAt(index) - '0';
+      //  如果前两个数还没有补充，则开始补充
+      if (first == -1)
+          return dfs(num, index + 1, val, second, cur);
+      // 如果前一个数还没有补充 即可以补充第一个数，也可以补充前一个数
+      if (second == -1) {
+          //如果前两个数是0，只能补充前一个数
+          if (first == 0)
+              return dfs(num, index + 1, first, val, cur);
+          //补充前两个数
+          if (first <= max)
+              return dfs(num, index + 1, first * 10 + val, second, cur) || dfs(num, index + 1, first, val, cur);
+          // 补充前一个数
+          return dfs(num, index + 1, first, val, cur);
+      }
+      if (cur == -1) {
+          if (second == 0)
+              return dfs(num, index + 1, first, second, val);
+          if (second <= max)
+              return dfs(num, index + 1, first, second * 10 + val, cur) || dfs(num, index + 1, first, second, val);
+          return dfs(num, index + 1, first, second, val);
+      }
+      if (first + second == cur)
+          return dfs(num, index + 1, second, cur, val);
+      if (first + second < cur || cur == 0 || cur > max)
+          return false;
+      return dfs(num, index + 1, first, second, cur * 10 + val);
   }
   ```
 
