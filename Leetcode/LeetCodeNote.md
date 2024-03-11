@@ -40,6 +40,7 @@
     - [2.9 ByteDance-LC670-最大交换](#29-bytedance-lc670-最大交换)
     - [2.10 ByteDance-LC402-移掉K位数字](#210-bytedance-lc402-移掉k位数字)
     - [2.11 ByteDance-LC306-累加数](#211-bytedance-lc306-累加数)
+    - [2.12 ByteDance-LC467-环绕字符串中唯一的子字符串](#212-bytedance-lc467-环绕字符串中唯一的子字符串)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -1932,10 +1933,76 @@ public int maxCoins(int[] nums) {
       }
       if (first + second == cur)
           return dfs(num, index + 1, second, cur, val);
-      if (first + second < cur || cur == 0 || cur > max)
+      if (first + second < cur || cur == 0)
           return false;
       return dfs(num, index + 1, first, second, cur * 10 + val);
   }
   ```
+### 2.12 ByteDance-LC467-环绕字符串中唯一的子字符串
+* 题目描述
+  * 定义a-z的循环子串base
+  * 给定字符串s，判断s中有多少个连续子串在base中出现
+* 解题思路
+  * 暴力动态规划+hashset去重
+  * 线性动态规划
+* 暴力动态规划+hashset去重
+  * 定义dp[j][i]--〉代表s[j-i]是不是连续子串
+    * 若$i==j , dp[j][i]=true$
+    * 若s[j]和s[j+1]连续，则$dp[j][i] = dp[j+1][i]$
+  * 若dp[j][i],将其加入到哈希表中即可
+  * 代码
+  ```java
+   public int findSubstringInWraproundString(String s) {
+      int len = s.length();
+      boolean[][] serial = new boolean[len][len];
+      Set<String> sets = new HashSet<>();
 
+      for (int i = 0; i < len; i++) {
+          for (int j = i; j >= 0; j--) {
+              if (j == i) {
+                  serial[j][i] = true;
+              } else {
+                  if (check(s.charAt(j), s.charAt(j + 1)) && serial[j + 1][i]) {
+                      serial[j][i] = serial[j + 1][i];
+                  }
+              }
+              if (serial[j][i]) {
+                  sets.add(s.substring(j, i + 1));
+              }
+          }
+      }
+      return sets.size();
+  }
+  ```
+* 线性动态规划
+  * 定义dp[26],代表以小写字母为尾，有多少个连续子串
+  * 具体方法
+    * 从头到尾遍历，如果i-1和i连续，则一直累加，并动态规划取累加值和dp的最大值
+    * 最后将dp累加即可
+  * 代码
+  ```java
+  public int findSubstringInWraproundString(String s) {
+      // 以26个小写字母为结尾的最长连续子串的长度
+      int[] dp = new int[26];
+      char[] charArray = s.toCharArray();
+      int count = 0;
+      for (int i = 0; i < charArray.length; i++) {
+          if (i > 0 && check(charArray[i - 1], charArray[i])) {
+              count++;
+          } else {
+              count = 1;
+          }
+          dp[charArray[i] - 'a'] = Math.max(count, dp[charArray[i] - 'a']);
+      }
 
+      int result = 0;
+      for (int res : dp) {
+          result += res;
+      }
+      return result;
+  }
+
+  private boolean check(char a, char b) {
+      return b - a == 1 || (a == 'z' && b == 'a');
+  }
+  ```
