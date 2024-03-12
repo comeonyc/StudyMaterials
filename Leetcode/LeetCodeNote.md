@@ -44,6 +44,12 @@
     - [2.13 ByteDance-LC2454-下一个更大的元素IV](#213-bytedance-lc2454-下一个更大的元素iv)
     - [2.14 ByteDance-LC718-最长重复数组](#214-bytedance-lc718-最长重复数组)
     - [2.15 ByteDance-LC面试题17.24-最大子矩阵](#215-bytedance-lc面试题1724-最大子矩阵)
+    - [2.16 ByteDance-LC1488-避免洪水泛滥](#216-bytedance-lc1488-避免洪水泛滥)
+    - [2.17 ByteDance-LC2420-找到所有好下标](#217-bytedance-lc2420-找到所有好下标)
+    - [2.18 ByteDance-LC697-数组的度](#218-bytedance-lc697-数组的度)
+    - [2.19 ByteDance-LC215-数组中的第K个最大元素](#219-bytedance-lc215-数组中的第k个最大元素)
+    - [2.20 ByteDance-LC224-基本计算器](#220-bytedance-lc224-基本计算器)
+    - [2.21 ByteDance-LC227-基本计算器二](#221-bytedance-lc227-基本计算器二)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -2177,3 +2183,388 @@ public int[] getMaxMatrix(int[][] matrix) {
     return ans;
 }
 ```
+### 2.16 ByteDance-LC1488-避免洪水泛滥
+* 题目描述
+  * 你的国家有无数个湖泊，所有湖泊一开始都是空的。当第 n 个湖泊下雨前是空的，那么它就会装满水。如果第 n 个湖泊下雨前是 满的 ，这个湖泊会发生 洪水 。你的目标是避免任意一个湖泊发生洪水。
+  * 给你一个整数数组 rains ，其中：
+    * rains[i] > 0 表示第 i 天时，第 rains[i] 个湖泊会下雨
+    * rains[i] == 0 表示第 i 天没有湖泊会下雨，你可以选择 一个 湖泊并 抽干 这个湖泊的水。
+* 解题思路
+  * 利用hash表,存储下雨天
+  * 利用列表存储，哪天可以抽水，并懒加载抽水
+  * 每次遍历到rains[i]大于0的节点
+    * 利用hash表找到上次下雨的天，并从要抽水的天找到第一个比上次下雨大的天，抽水即可
+* 代码
+```java
+public int[] avoidFlood(int[] rains) {
+    if (rains == null || rains.length <= 0) {
+        return new int[0];
+    }
+
+    Map<Integer, Integer> rainFlag = new HashMap<>();
+    int[] ans = new int[rains.length];
+    Arrays.fill(ans,1);
+    List<Integer> deleteDays = new ArrayList<>();
+
+    for (int i = 0; i < rains.length; i++) {
+        if (rains[i] > 0) {
+            ans[i] = -1;
+            if (rainFlag.containsKey(rains[i])) {
+                int last = rainFlag.get(rains[i]);
+                boolean replace = false;
+                for(int j=0;j<deleteDays.size();j++){
+                    int day = deleteDays.get(j);
+                    if (day > last) {
+                        ans[day] = rains[i];
+                        rainFlag.remove(rains[i]);
+                        deleteDays.remove(j);
+                        replace = true;
+                        break;
+                    }
+                }
+                if (!replace) {
+                    return new int[0];
+                }
+                rainFlag.put(rains[i],i);
+            } else {
+                rainFlag.put(rains[i], i);
+            }
+        } else if (rains[i] == 0) {
+            deleteDays.add(i);
+        }
+    }
+    return ans;
+}
+```
+### 2.17 ByteDance-LC2420-找到所有好下标
+* 题目描述
+  * 给你一个大小为 n 下标从 0 开始的整数数组 nums 和一个正整数 k 
+  * 对于 k <= i < n - k 之间的一个下标 i ，如果它满足以下条件，我们就称它为一个 好 下标：
+    * 下标 i 之前 的 k 个元素是 非递增的 。
+    * 下标 i 之后 的 k 个元素是 非递减的 。
+  * 按 升序 返回所有好下标。
+* 解题思路
+  * 动态规划
+    * 用left[i],存储以i为结尾的，非递增连续长度
+    * 用right[i],存储以i开头的，非递减的连续长度
+    * 最后遍历即可
+* 代码
+```java
+public List<Integer> goodIndices(int[] nums, int k) {
+    int minLen = k * 2 + 1;
+    int len = 0;
+    if (nums == null || (len = nums.length) < minLen) {
+        return new ArrayList<>();
+    }
+    int[] left = new int[len];
+    left[0] = 1;
+    for (int i = 1; i < len; i++) {
+        if (nums[i] <= nums[i - 1]) {
+            left[i] = left[i - 1] + 1;
+        } else {
+            left[i] = 1;
+        }
+    }
+
+    int[] right = new int[len];
+    right[len - 1] = 1;
+    for (int i = len - 2; i >= 0; i--) {
+        if (nums[i] <= nums[i + 1]) {
+            right[i] = right[i + 1] + 1;
+        } else {
+            right[i] = 1;
+        }
+    }
+
+    List<Integer> result = new ArrayList<>();
+    for (int i = k; i <= len - k - 1; i++) {
+        if (left[i - 1] >= k && right[i + 1] >= k) {
+            result.add(i);
+        }
+    }
+    return result;
+}
+```
+### 2.18 ByteDance-LC697-数组的度
+* 题目描述
+  * 给定一个非空且只包含非负数的整数数组 nums，数组的 度 的定义是指数组里任一元素出现频数的最大值。
+  * 你的任务是在 nums 中找到与 nums 拥有相同大小的度的最短连续子数组，返回其长度。
+* 解题思路
+  * HashMap<Integer,int[3]>
+  * 其中key是具体值
+  * value的数组 0:代表该元素出现次数，1:代表首次出现位置，2:代表末次出现位置
+  * 最后从map遍历，找到出现次数最大的，最短距离即可
+* 代码
+  ```java
+  public int findShortestSubArray(int[] nums) {
+      Map<Integer, int[]> map = new HashMap<Integer, int[]>();
+      int n = nums.length;
+      for (int i = 0; i < n; i++) {
+          if (map.containsKey(nums[i])) {
+              map.get(nums[i])[0]++;
+              map.get(nums[i])[2] = i;
+          } else {
+              map.put(nums[i], new int[] { 1, i, i });
+          }
+      }
+      int maxNum = 0, minLen = 0;
+      for (Map.Entry<Integer, int[]> entry : map.entrySet()) {
+          int[] arr = entry.getValue();
+          if (maxNum < arr[0]) {
+              maxNum = arr[0];
+              minLen = arr[2] - arr[1] + 1;
+          } else if (maxNum == arr[0]) {
+              if (minLen > arr[2] - arr[1] + 1) {
+                  minLen = arr[2] - arr[1] + 1;
+              }
+          }
+      }
+      return minLen;
+  }
+  ```
+### 2.19 ByteDance-LC215-数组中的第K个最大元素
+* 题目描述
+  * 给定整数数组 nums 和整数 k，请返回数组中第 k 个最大的元素。
+  * 请注意，你需要找的是数组排序后的第 k 个最大的元素，而不是第 k 个不同的元素。
+  * 你必须设计并实现时间复杂度为 O(n) 的算法解决此问题。
+* 解题思路
+  * 快速排序
+  * 数组
+* 快速排序
+  * 利用快排找到每次基元素的位置，然后跟k做对比
+  ```java
+  public int findKthLargest(int[] nums, int k) {
+      int left = 0, right = nums.length - 1;
+      do {
+          int p = quickSort(nums, left, right);
+          if (p + 1 == k) {
+              return nums[p];
+          } else if (p + 1 > k) {
+              right = p - 1;
+          } else {
+              left = p + 1;
+          }
+      } while (true);
+  }
+
+  private int quickSort(int[] nums, int left, int right) {
+      if (left == right) {
+          return left;
+      }
+      Random random = new Random();
+      int flag = left + random.nextInt((right - left) + 1);
+      swap(nums, flag, left);
+      int mark = nums[left];
+      int l = left, r = right;
+      while (l < r) {
+          while (l < r && nums[r] <= mark) {
+              r--;
+          }
+          while (l < r && nums[l] >= mark) {
+              l++;
+          }
+          swap(nums, l, r);
+      }
+      swap(nums, l, left);
+      return l;
+  }
+
+  private void swap(int[] nums, int a, int b) {
+      int tmp = nums[a];
+      nums[a] = nums[b];
+      nums[b] = tmp;
+  }
+  ```
+* 数组方式
+  * 先记录最小最大值，然后创建max-min的数组
+  * 遍历数组，在max-min的数组中找到元素位置计数
+  * 最后对数组从高向低遍历即可直至到k
+  ```java
+  public int findKthLargest(int[] nums, int k) {
+      int max = nums[0], min = nums[0];
+      for (int num : nums) {
+          max = Math.max(max, num);
+          min = Math.min(min, num);
+      }
+      int[] container = new int[max - min + 1];
+      for (int num : nums) {
+          container[num - min]++;
+      }
+      for (int i = max; i >= min; i--) {
+          k -= container[i - min];
+          if (k <= 0) {
+              return i;
+          }
+      }
+      return -1;
+  }
+  ```
+### 2.20 ByteDance-LC224-基本计算器
+* 题目描述
+  * 给你一个字符串表达式 s ，请你实现一个基本计算器来计算并返回它的值。
+* 解题思路
+  * 使用两个栈
+    * nums:存放所有的数字
+    * ops:存放所有的数字意外的操作
+  * 具体几个字符串
+    * ( : 直接入栈
+    * ）: 操作栈，直至遇到富豪榜栈的第一个（
+    * +/- :计算即可
+* 代码
+  ```java
+  public int calculate(String s) {
+      // 存放所有的数字
+      Stack<Integer> nums = new Stack<>();
+      // 为了防止第一个数为负数，先往 nums 加个 0
+      nums.push(0);
+      // 将所有的空格去掉
+      s = s.replaceAll(" ", "");
+      // 存放所有的操作，包括 +/-
+      Stack<Character> ops = new Stack<>();
+      int n = s.length();
+      char[] cs = s.toCharArray();
+      for (int i = 0; i < n; i++) {
+          char c = cs[i];
+          if (c == '(') {
+              ops.push(c);
+          } else if (c == ')') {
+              // 计算到最近一个左括号为止
+              while (!ops.isEmpty()) {
+                  char op = ops.peek();
+                  if (op != '(') {
+                      calc(nums, ops);
+                  } else {
+                      ops.pop();
+                      break;
+                  }
+              }
+          } else {
+              if (isNum(c)) {
+                  int u = 0;
+                  int j = i;
+                  // 将从 i 位置开始后面的连续数字整体取出，加入 nums
+                  while (j < n && isNum(cs[j]))
+                      u = u * 10 + (int) (cs[j++] - '0');
+                  nums.push(u);
+                  i = j - 1;
+              } else {
+                  if (i > 0 && (cs[i - 1] == '(' || cs[i - 1] == '+' || cs[i - 1] == '-')) {
+                      nums.push(0);
+                  }
+                  // 有一个新操作要入栈时，先把栈内可以算的都算了
+                  while (!ops.isEmpty() && ops.peek() != '(')
+                      calc(nums, ops);
+                  ops.push(c);
+              }
+          }
+      }
+      while (!ops.isEmpty())
+          calc(nums, ops);
+      return nums.pop();
+  }
+
+  void calc(Stack<Integer> nums, Stack<Character> ops) {
+      if (nums.isEmpty() || nums.size() < 2)
+          return;
+      if (ops.isEmpty())
+          return;
+      int b = nums.pop(), a = nums.pop();
+      char op = ops.pop();
+      nums.push(op == '+' ? a + b : a - b);
+  }
+
+  boolean isNum(char c) {
+      return Character.isDigit(c);
+  }
+  ```
+### 2.21 ByteDance-LC227-基本计算器二
+* 题目描述
+  * 给你一个字符串表达式 s ，请你实现一个基本计算器来计算并返回它的值。整数除法仅保留整数部分。你可以假设给定的表达式总是有效的。所有中间结果将在 [-231, 231 - 1] 的范围内。
+* 解题思路
+  * 大致跟上一道题一致，额外要判断一下优先级，高优先级能先执行
+* 代码
+```java
+// 使用 map 维护一个运算符优先级
+    // 这里的优先级划分按照「数学」进行划分即可
+    Map<Character, Integer> map = new HashMap<>(){{
+        put('-', 1);
+        put('+', 1);
+        put('*', 2);
+        put('/', 2);
+        put('%', 2);
+        put('^', 3);
+    }};
+    public int calculate(String s) {
+        // 将所有的空格去掉
+        s = s.replaceAll(" ", "");
+        char[] cs = s.toCharArray();
+        int n = s.length();
+        // 存放所有的数字
+        Deque<Integer> nums = new ArrayDeque<>();
+        // 为了防止第一个数为负数，先往 nums 加个 0
+        nums.addLast(0);
+        // 存放所有「非数字以外」的操作
+        Deque<Character> ops = new ArrayDeque<>();
+        for (int i = 0; i < n; i++) {
+            char c = cs[i];
+            if (c == '(') {
+                ops.addLast(c);
+            } else if (c == ')') {
+                // 计算到最近一个左括号为止
+                while (!ops.isEmpty()) {
+                    if (ops.peekLast() != '(') {
+                        calc(nums, ops);
+                    } else {
+                        ops.pollLast();
+                        break;
+                    }
+                }
+            } else {
+                if (isNumber(c)) {
+                    int u = 0;
+                    int j = i;
+                    // 将从 i 位置开始后面的连续数字整体取出，加入 nums
+                    while (j < n && isNumber(cs[j])) u = u * 10 + (cs[j++] - '0');
+                    nums.addLast(u);
+                    i = j - 1;
+                } else {
+                    if (i > 0 && (cs[i - 1] == '(' || cs[i - 1] == '+' || cs[i - 1] == '-')) {
+                        nums.addLast(0);
+                    }
+                    // 有一个新操作要入栈时，先把栈内可以算的都算了 
+                    // 只有满足「栈内运算符」比「当前运算符」优先级高/同等，才进行运算
+                    while (!ops.isEmpty() && ops.peekLast() != '(') {
+                        char prev = ops.peekLast();
+                        if (map.get(prev) >= map.get(c)) {
+                            calc(nums, ops);
+                        } else {
+                            break;
+                        }
+                    }
+                    ops.addLast(c);
+                }
+            }
+        }
+        // 将剩余的计算完
+        while (!ops.isEmpty()) calc(nums, ops);
+        return nums.peekLast();
+    }
+    void calc(Deque<Integer> nums, Deque<Character> ops) {
+        if (nums.isEmpty() || nums.size() < 2) return;
+        if (ops.isEmpty()) return;
+        int b = nums.pollLast(), a = nums.pollLast();
+        char op = ops.pollLast();
+        int ans = 0;
+        if (op == '+') ans = a + b;
+        else if (op == '-') ans = a - b;
+        else if (op == '*') ans = a * b;
+        else if (op == '/')  ans = a / b;
+        else if (op == '^') ans = (int)Math.pow(a, b);
+        else if (op == '%') ans = a % b;
+        nums.addLast(ans);
+    }
+    boolean isNumber(char c) {
+        return Character.isDigit(c);
+    }
+```
+
