@@ -43,6 +43,7 @@
     - [2.12 ByteDance-LC467-环绕字符串中唯一的子字符串](#212-bytedance-lc467-环绕字符串中唯一的子字符串)
     - [2.13 ByteDance-LC2454-下一个更大的元素IV](#213-bytedance-lc2454-下一个更大的元素iv)
     - [2.14 ByteDance-LC718-最长重复数组](#214-bytedance-lc718-最长重复数组)
+    - [2.15 ByteDance-LC面试题17.24-最大子矩阵](#215-bytedance-lc面试题1724-最大子矩阵)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -2131,3 +2132,48 @@ public int maxCoins(int[] nums) {
       return ret;
   }
   ```
+### 2.15 ByteDance-LC面试题17.24-最大子矩阵
+* 题目描述
+  * 给定一个正整数、负整数和 0 组成的 N × M 矩阵，编写代码找出元素总和最大的子矩阵。
+* 解题思路
+  * 之前最大子矩阵+最长连续数组和的方式
+  * 分别从第i行向下看，累加纵向元素，然后将其退化成一维数组连续数组和
+  ![流程](./pic/LC面试题17.24.png "流程")
+* 代码
+```java
+public int[] getMaxMatrix(int[][] matrix) {
+    int max = Integer.MIN_VALUE;
+    int dp = 0, start = 0;
+    int[] ans = new int[] { -1, -1, 200, 200 };// 结果
+    int[] sum = null;// 纵向累加数组
+
+    // 以第i行为起始行
+    for (int i = 0; i < matrix.length; i++) {
+        sum = new int[matrix[0].length];
+
+        // 从第i行到最后一行累加
+        for (int j = i; j < matrix.length; j++) {
+            dp = 0;
+            start = 0;
+
+            //转化成一维数组 j，k为尾节点
+            for (int k = 0; k < sum.length; k++) {
+                sum[k] += matrix[j][k];
+                dp += sum[k];
+                if (max < dp) {
+                    ans[0] = i;
+                    ans[1] = start;
+                    ans[2] = j;
+                    ans[3] = k;
+                    max = dp;
+                }
+                if (dp < 0) {
+                    dp = 0;
+                    start = k + 1;
+                }
+            }
+        }
+    }
+    return ans;
+}
+```
