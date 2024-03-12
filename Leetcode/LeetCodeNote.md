@@ -41,6 +41,8 @@
     - [2.10 ByteDance-LC402-移掉K位数字](#210-bytedance-lc402-移掉k位数字)
     - [2.11 ByteDance-LC306-累加数](#211-bytedance-lc306-累加数)
     - [2.12 ByteDance-LC467-环绕字符串中唯一的子字符串](#212-bytedance-lc467-环绕字符串中唯一的子字符串)
+    - [2.13 ByteDance-LC2454-下一个更大的元素IV](#213-bytedance-lc2454-下一个更大的元素iv)
+    - [2.14 ByteDance-LC718-最长重复数组](#214-bytedance-lc718-最长重复数组)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -2004,5 +2006,128 @@ public int maxCoins(int[] nums) {
 
   private boolean check(char a, char b) {
       return b - a == 1 || (a == 'z' && b == 'a');
+  }
+  ```
+### 2.13 ByteDance-LC2454-下一个更大的元素IV
+* 题目描述
+  * 给你一个下标从 0 开始的非负整数数组 nums 。对于 nums 中每一个整数，你必须找到对应元素的 第二大 整数。如果 nums[j] 满足以下条件，那么我们称它为 nums[i] 的 第二大 整数
+* 解题思路
+  * 用两个单调栈
+  * 用一个单调栈可以找到比大的第一个元素，若要找比它大的第二元素，则应先将出栈的元素在存到一个单调栈中，然后在跟当前元素比较即可
+   ![流程](./pic/lc2454.png "流程")
+* 代码
+  ```java
+  public int[] secondGreaterElement(int[] nums) {
+      if (nums == null || nums.length == 0) {
+          return new int[0];
+      }
+
+      Stack<Integer> first = new Stack<>();
+      Stack<Integer> second = new Stack<>();
+      List<Integer> tmp = new ArrayList<>();
+
+      int[] ans = new int[nums.length];
+      Arrays.fill(ans, -1);
+      for (int i = 0; i < nums.length; i++) {
+          while (!second.isEmpty() && nums[i] > nums[second.peek()]) {
+              ans[second.pop()] = nums[i];
+          }
+
+          tmp.clear();
+          while (!first.isEmpty() && nums[i] > nums[first.peek()]) {
+              tmp.add(first.pop());
+          }
+
+          for (int j = tmp.size() - 1; j >= 0; j--) {
+              second.push(tmp.get(j));
+          }
+
+          first.push(i);
+      }
+
+      return ans;
+  }
+  ```
+  ### 2.14 ByteDance-LC718-最长重复数组
+* 题目描述
+  * 给两个整数数组 nums1 和 nums2 ，返回 两个数组中 公共的 、长度最长的子数组的长度 。
+* 解题思路
+  * 动态规划
+  * 滑动窗口
+* 动态规划
+  * dp流程
+    * 设定dp[i][j],代表nums1[0..i]与nums[0...j]的最长公共数组长度
+    * 如果nums[i] == nums[j],dp[i][j] = dp[i-1][j-1]+1
+    * 否则 dp[i][j] = 0
+    * 在这个过程中要记录dp[i][j]的最大值
+  * 代码
+  ```java
+  public int findLength(int[] nums1, int[] nums2) {
+      if (nums1 == null || nums2 == null) {
+          return 0;
+      }
+      if (nums1.length == 0 || nums2.length == 0) {
+          return 0;
+      }
+      int m = nums1.length;
+      int n = nums2.length;
+      // dp[i][j] 代表（0-i）与(0-j) 最大重复数组
+      int[][] dp = new int[m][n];
+      int max = 0;
+      // init
+      for (int i = 0; i < n; i++) {
+          dp[0][i] = nums1[0] == nums2[i] ? 1 : 0;
+          max = Math.max(max, dp[0][i]);
+      }
+
+      for (int i = 0; i < m; i++) {
+          dp[i][0] = nums1[i] == nums2[0] ? 1 : 0;
+          max = Math.max(max, dp[i][0]);
+
+      }
+
+      for (int i = 1; i < m; i++) {
+          for (int j = 1; j < n; j++) {
+              if (nums1[i] == nums2[j]) {
+                  dp[i][j] = dp[i - 1][j - 1] + 1;
+                  max = Math.max(max, dp[i][j]);
+              }
+          }
+      }
+      return max;
+  }
+  ```
+* 滑动窗口
+  * 大致流程
+    * 指定最长连续长度，分别用nums1和nums2比较
+  * 代码
+  ```java
+  public int findLength(int[] A, int[] B) {
+      int n = A.length, m = B.length;
+      int ret = 0;
+      for (int i = 0; i < n; i++) {
+          int len = Math.min(m, n - i);
+          int maxlen = maxLength(A, B, i, 0, len);
+          ret = Math.max(ret, maxlen);
+      }
+      for (int i = 0; i < m; i++) {
+          int len = Math.min(n, m - i);
+          int maxlen = maxLength(A, B, 0, i, len);
+          ret = Math.max(ret, maxlen);
+      }
+      return ret;
+  }
+
+  public int maxLength(int[] A, int[] B, int addA, int addB, int len) {
+      int ret = 0, k = 0;
+      for (int i = 0; i < len; i++) {
+          if (A[addA + i] == B[addB + i]) {
+              k++;
+          } else {
+              k = 0;
+          }
+          ret = Math.max(ret, k);
+      }
+      return ret;
   }
   ```
