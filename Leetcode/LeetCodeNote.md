@@ -36,7 +36,7 @@
     - [2.8 ByteDance- LC69-x的平方根](#28-bytedance--lc69-x的平方根)
     - [2.9 ByteDance-LC68-文本左右对齐](#29-bytedance-lc68-文本左右对齐)
     - [2.7 ByteDance-LC2262-字符串的总引力](#27-bytedance-lc2262-字符串的总引力)
-    - [2.8 ByteDance-LC386-字段序排数](#28-bytedance-lc386-字段序排数)
+    - [2.8 ByteDance-LC386-字典序排数](#28-bytedance-lc386-字典序排数)
     - [2.9 ByteDance-LC670-最大交换](#29-bytedance-lc670-最大交换)
     - [2.10 ByteDance-LC402-移掉K位数字](#210-bytedance-lc402-移掉k位数字)
     - [2.11 ByteDance-LC306-累加数](#211-bytedance-lc306-累加数)
@@ -50,6 +50,7 @@
     - [2.19 ByteDance-LC215-数组中的第K个最大元素](#219-bytedance-lc215-数组中的第k个最大元素)
     - [2.20 ByteDance-LC224-基本计算器](#220-bytedance-lc224-基本计算器)
     - [2.21 ByteDance-LC227-基本计算器二](#221-bytedance-lc227-基本计算器二)
+  - [3. CodeTOP-ByteDance](#3-codetop-bytedance)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -1771,7 +1772,7 @@ public int maxCoins(int[] nums) {
       return result;
   }
   ```
-### 2.8 ByteDance-LC386-字段序排数
+### 2.8 ByteDance-LC386-字典序排数
 * 题目描述
   * 给你一个整数 n ，按字典序返回范围 [1, n] 内所有整数。
   * 时间复杂度为 O(n) 且使用 O(1) 额外空间的算法。
@@ -2567,4 +2568,4 @@ public List<Integer> goodIndices(int[] nums, int k) {
         return Character.isDigit(c);
     }
 ```
-
+## 3. CodeTOP-ByteDance
