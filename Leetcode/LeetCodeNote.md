@@ -51,6 +51,8 @@
     - [2.20 ByteDance-LC224-基本计算器](#220-bytedance-lc224-基本计算器)
     - [2.21 ByteDance-LC227-基本计算器二](#221-bytedance-lc227-基本计算器二)
   - [3. CodeTOP-ByteDance](#3-codetop-bytedance)
+    - [3.1 CodeTop-LC662-二叉树最大宽度](#31-codetop-lc662-二叉树最大宽度)
+    - [3.2 CodeTop-LC面试题16.16-部分排序（与581同）](#32-codetop-lc面试题1616-部分排序与581同)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -2569,3 +2571,111 @@ public List<Integer> goodIndices(int[] nums, int k) {
     }
 ```
 ## 3. CodeTOP-ByteDance
+### 3.1 CodeTop-LC662-二叉树最大宽度
+* 题目描述
+  * 给你一棵二叉树的根节点 root ，返回树的 最大宽度 。
+  * 树的 最大宽度 是所有层中最大的 宽度 。
+  * 每一层的 宽度 被定义为该层最左和最右的非空节点（即，两个端点）之间的长度。将这个二叉树视作与满二叉树结构相同，两端点间会出现一些延伸到这一层的 null 节点，这些 null 节点也计入长度。
+* 解题思路
+  * 借助完全二叉树的性质，用每个节点应该的编号来计算进而计算每层最大长度
+  * 孩子左节点的编号=父节点的编号*2
+  * 孩子右节点的编号=父节点的编号*2+2
+* 代码
+  ```java
+  int result = 0;
+  public int widthOfBinaryTree(TreeNode root) {
+    getMaxWidth(root, 0, 1, new HashMap<>());
+    return result;
+  }
+
+  private void getMaxWidth(TreeNode root, int level, int index, Map<Integer, Integer> level2min) {
+    if (root == null) {
+        return;
+    }
+    if (!level2min.containsKey(level)) {
+        level2min.put(level, index);
+    }
+
+    result = Math.max(result, index - level2min.get(level) + 1);
+    getMaxWidth(root.left, level + 1, index * 2, level2min);
+    getMaxWidth(root.right, level + 1, index * 2 + 1, level2min);
+  }
+  ```
+### 3.2 CodeTop-LC面试题16.16-部分排序（与581同）
+* 题目描述
+  * 给定一个整数数组，编写一个函数，找出索引m和n，只要将索引区间[m,n]的元素排好序，整个数组就是有序的。注意：n-m尽量最小，也就是说，找出符合条件的最短序列。函数返回值为[m,n]，若不存在这样的m和n（例如整个数组是有序的），请返回[-1,-1]。
+* 解题思路
+  * 单调栈
+  * 数组
+* 单调栈
+  * 从左到右遍历维护递增栈，如果遇到值比栈顶小，说明遇到了降序空间，要去找第一个比它小的位置，维护最左边的位置
+  * 从右到左遍历维护递减栈，如果遇到值比栈顶大，说明遇到了升序空间，要去找右侧第一个比它大的位置，维护最右侧
+* 代码
+  ```java
+  public int[] subSort(int[] array) {
+        if (null == array || array.length < 2) {
+            return new int[] { -1, -1 };
+        }
+
+        int left = array.length, right = -1;
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < array.length; i++) {
+            while (!stack.isEmpty() && array[i] < array[stack.peek()]) {
+                left = Math.min(left, stack.pop());
+            }
+            stack.push(i);
+        }
+
+        if (left == array.length) {
+            return new int[] { -1, -1 };
+        }
+
+        stack.clear();
+        for (int i = array.length - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && array[i] > array[stack.peek()]) {
+                right = Math.max(right, stack.pop());
+            }
+            stack.push(i);
+        }
+
+        return left > right ? new int[] { -1, -1 } : new int[] { left, right };
+    }
+  ```
+* 数组
+  * 大致思路与上面同，都是找左右边界
+  * 从左到右遍历，找右边界
+    * 维护最大值，如果当前值比最大值大，做最大值做替换；否则当前值的位置就有可能成为左侧最大值的可能位置，维护右边界
+  * 从右到左遍历，找左边界
+    * 维护最小值，如果当前值比最小值小，做最小值做替换；否则当前值的位置就有可能成为右侧最小值的可能位置，维护右左边界
+  * 代码
+  ```java
+  public int[] subSort(int[] array) {
+        if (null == array || array.length < 2) {
+            return new int[] { -1, -1 };
+        }
+
+        int left = array.length, right = -1;
+        int max = array[0];
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] >= max) {
+                max = array[i];
+            } else {
+                right = i;
+            }
+        }
+
+        if (right < 0) {
+            return new int[] { -1, -1 };
+        }
+
+        int min = array[array.length - 1];
+        for (int i = array.length - 1; i >= 0; i--) {
+            if (array[i] <= min) {
+                min = array[i];
+            } else {
+                left = i;
+            }
+        }
+        return new int[] { left, right };
+    }
+  ```
