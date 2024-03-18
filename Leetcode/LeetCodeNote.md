@@ -58,6 +58,8 @@
     - [3.5 CodeTop-LC265-丑数](#35-codetop-lc265-丑数)
     - [3.6 CodeTop-LC204-计数质数](#36-codetop-lc204-计数质数)
     - [3.7 CodeTop-LC964-验证栈序列](#37-codetop-lc964-验证栈序列)
+    - [3.8 CodeTop-LC40-组合总数二](#38-codetop-lc40-组合总数二)
+    - [3.9 CodeTop-LC792-匹配子序列的单词数](#39-codetop-lc792-匹配子序列的单词数)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -2860,5 +2862,81 @@ public boolean validateStackSequences(int[] pushed, int[] popped) {
     }
 
     return stack.isEmpty() && r == popped.length;
+}
+```
+### 3.8 CodeTop-LC40-组合总数二
+* 题目描述
+  * 给定一个候选人编号的集合 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。
+  * candidates 中的每个数字在每个组合中只能使用 一次 。
+* 解题思路
+  * 回溯+剪枝
+  * 先排序，如果之前和加上这个比，目标值大，直接退出
+  * 如果相邻两个数相同， 跳过
+* 代码
+```java
+public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+    Arrays.sort(candidates);
+    List<List<Integer>> result = new ArrayList<>();
+    dfs(candidates, 0, target, 0, result, new ArrayList<>());
+    return result;
+}
+
+public void dfs(int[] candidates, int index, int target, int sum, List<List<Integer>> result, List<Integer> tmp) {
+    if (sum == target) {
+        result.add(new ArrayList<>(tmp));
+        return;
+    }
+
+    for (int i = index; i < candidates.length; i++) {
+        if (sum + candidates[index] > target) {
+            return;
+        }
+        if (i > index && candidates[i] == candidates[i - 1]) {
+            continue;
+        }
+        tmp.add(candidates[i]);
+        sum += candidates[i];
+        dfs(candidates, i + 1, target, sum, result, tmp);
+        tmp.remove(tmp.size() - 1);
+        sum -= candidates[i];
+    }
+}
+```
+### 3.9 CodeTop-LC792-匹配子序列的单词数
+* 题目描述
+  * 给定字符串 s 和字符串数组 words, 返回  words[i] 中是s的子序列的单词个数 。
+  * 字符串的 子序列 是从原始字符串中生成的新字符串，可以从中删去一些字符(可以是none)，而不改变其余字符的相对顺序。
+* 解题思路
+  * 利用hashmap先将words集中在一起
+  * 分别遍历s和word，如果满足则记录即可
+* 代码
+```java
+class Solution {
+    Map<String, Integer> map = new HashMap<>();
+
+    public int numMatchingSubseq(String s, String[] words) {
+        int ans = 0;
+        for (String word : words) {
+            map.put(word, map.getOrDefault(word, 0) + 1);
+        }
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            if (help(s, entry.getKey()))
+                ans += entry.getValue();
+        }
+        return ans;
+    }
+
+    private boolean help(String s, String t) {
+        if (t.length() > s.length())
+            return false;
+        int i = 0, j = 0;
+        while (i < s.length() && j < t.length()) {
+            if (s.charAt(i) == t.charAt(j)) {
+                j++;
+            }
+            i++;
+        }
+        return j == t.length();
+    }
 }
 ```
