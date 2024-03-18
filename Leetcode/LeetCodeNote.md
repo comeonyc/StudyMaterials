@@ -55,6 +55,9 @@
     - [3.2 CodeTop-LC面试题16.16-部分排序（与581同）](#32-codetop-lc面试题1616-部分排序与581同)
     - [3.3 CodeTop-LC440-字典序的第K位小数](#33-codetop-lc440-字典序的第k位小数)
     - [3.4 CodeTop-LC523-连续的子数组之和](#34-codetop-lc523-连续的子数组之和)
+    - [3.5 CodeTop-LC265-丑数](#35-codetop-lc265-丑数)
+    - [3.6 CodeTop-LC204-计数质数](#36-codetop-lc204-计数质数)
+    - [3.7 CodeTop-LC964-验证栈序列](#37-codetop-lc964-验证栈序列)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -2759,5 +2762,103 @@ public boolean checkSubarraySum(int[] nums, int k) {
         }
     }
     return false;
+}
+```
+### 3.5 CodeTop-LC265-丑数
+* 题目描述
+  * 给你一个整数 n ，请你找出并返回第 n 个 丑数 。
+  * 丑数 就是质因子只包含 2、3 和 5 的正整数。
+* 解题思路
+  * 用三个指针，分别指向生成2的倍数,3的倍数，5的倍数的最小丑数
+  * 每次生成新丑数时，取上面三个最小的
+  * 并且对指针进行累加
+* 代码
+  ```java
+  public int nthUglyNumber(int n) {
+    int a = 0, b = 0, c = 0;
+    int[] res = new int[n];
+    res[0] = 1;
+    for(int i = 1; i < n; i++) {
+        int n2 = res[a] * 2, n3 = res[b] * 3, n5 = res[c] * 5;
+        res[i] = Math.min(Math.min(n2, n3), n5);
+        if (res[i] == n2) a++;
+        if (res[i] == n3) b++;
+        if (res[i] == n5) c++;
+    }
+    return res[n - 1];
+  } 
+  ```
+### 3.6 CodeTop-LC204-计数质数
+* 题目描述
+  * 给定整数 n ，返回 所有小于非负整数 n 的质数的数量 。
+* 解题思路
+  * 如果一个数是质数，那么其的倍数就都不是了
+  * 利用动态规划
+* 代码
+```java
+public int countPrimes(int n) {
+    boolean[] isPrim = new boolean[n];
+    Arrays.fill(isPrim, true);
+    for (int i = 2; i * i < n; i++) {
+        if (isPrim[i]) {
+            for (int j = 2 * i; j < n; j += i) {
+                isPrim[j] = false;
+            }
+        }
+    }
+
+    // 计数
+    int cnt = 0;
+    for (int i = 2; i < n; i++) {
+        if (isPrim[i]) {
+            cnt++;
+        }
+    }
+    return cnt;
+}
+```
+### 3.7 CodeTop-LC964-验证栈序列
+* 题目描述：
+  * 给定 pushed 和 popped 两个序列，每个序列中的 值都不重复，只有当它们可能是在最初空栈上进行的推入 push 和弹出 pop 操作序列的结果时，返回 true；否则，返回 false 。
+* 解题思路
+  * 利用栈+双指针
+  * 分别遍历pushed数组，将poped索引位置前的插入到栈中
+  * 然后根据poped顺序，将顺序从栈中移除出去
+  * 最后比较栈中元素和poped元素即可
+* 代码
+```java
+public boolean validateStackSequences(int[] pushed, int[] popped) {
+    if (null == pushed || pushed.length == 0) {
+        return popped == null || popped.length == 0;
+    }
+    if (null == popped || popped.length == 0) {
+        return false;
+    }
+    Stack<Integer> stack = new Stack<>();
+    int l = 0, r = 0;
+    while (l < pushed.length && r < popped.length) {
+        while (!stack.isEmpty() && stack.peek() == popped[r]) {
+            stack.pop();
+            r++;
+        }
+        int flag = popped[r];
+        while (l < pushed.length && pushed[l] != flag) {
+            stack.push(pushed[l]);
+            l++;
+        }
+        if (l < pushed.length) {
+            stack.push(pushed[l]);
+            l++;
+        } else {
+            return false;
+        }
+    }
+
+    while (!stack.isEmpty() && r < popped.length && stack.peek() == popped[r]) {
+        stack.pop();
+        r++;
+    }
+
+    return stack.isEmpty() && r == popped.length;
 }
 ```
