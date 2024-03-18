@@ -53,6 +53,8 @@
   - [3. CodeTOP-ByteDance](#3-codetop-bytedance)
     - [3.1 CodeTop-LC662-二叉树最大宽度](#31-codetop-lc662-二叉树最大宽度)
     - [3.2 CodeTop-LC面试题16.16-部分排序（与581同）](#32-codetop-lc面试题1616-部分排序与581同)
+    - [3.3 CodeTop-LC440-字典序的第K位小数](#33-codetop-lc440-字典序的第k位小数)
+    - [3.4 CodeTop-LC523-连续的子数组之和](#34-codetop-lc523-连续的子数组之和)
 
 ## 0、基础算法
 ### 0.1 快速排序
@@ -2679,3 +2681,83 @@ public List<Integer> goodIndices(int[] nums, int k) {
         return new int[] { left, right };
     }
   ```
+### 3.3 CodeTop-LC440-字典序的第K位小数
+* 题目描述
+  * 给定整数 n 和 k，返回  [1, n] 中字典序第 k 小的数字。
+* 解题思路
+  * 从1开始，搜索以它为前缀数字之和
+    * 小于n的那层之上的所有数
+  * 累加后如果大于k，则说明就在这条前缀树上
+  * 如果小于k，则说明要去旁边的树看看
+* 代码
+```java
+public int findKthNumber(int n, int k) {
+    long cur = 1;
+    int count = 0;
+    while (count < k) {
+        count += 1;
+        if (count == k) {
+            return (int) cur;
+        }
+
+        int countsFromCur = countsFromCur(cur, n);
+        if (count + countsFromCur - 1 >= k) {
+            cur *= 10;
+        } else {
+            count = count + countsFromCur - 1;
+            cur += 1;
+        }
+    }
+    return (int)cur;
+}
+
+private int countsFromCur(long cur, int n) {
+    long node = cur;
+    long nextNode = cur + 1;
+    long count = 0;
+    while (node <= n) {
+        count += Math.min(nextNode, n + 1) - node;
+
+        if (node * 10 <= n) {
+            node *= 10;
+            nextNode *= 10;
+        } else {
+            break;
+        }
+    }
+    return (int) count;
+}
+```
+### 3.4 CodeTop-LC523-连续的子数组之和
+* 题目描述：给你一个整数数组 nums 和一个整数 k ，编写一个函数来判断该数组是否含有同时满足下述条件的连续子数组：
+  * 子数组大小 至少为 2 ，且
+  * 子数组元素总和为 k 的倍数。
+  * 如果存在，返回 true ；否则，返回 false 。
+* 解题思路
+  * 前缀和+哈希表 （同余定理）
+* 同余定理证明
+  * b-a是k的倍数
+  * $b= x*k + r1$,$a=y*k+r2$
+  * $b-a = (y-x)k+(r2-r1)$
+  * 因为b-a是k的倍数,所以$r2-r1=0$
+* 代码
+```java
+public boolean checkSubarraySum(int[] nums, int k) {
+    if (null == nums || nums.length < 2) {
+        return false;
+    }
+    int preSum = 0;
+    Map<Integer, Integer> map = new HashMap();
+    map.put(0, -1);// 保存余数对应的下标
+    for (int i = 0; i < nums.length; ++i) {
+        preSum += nums[i];
+        int mod = preSum % k;
+        if (map.containsKey(mod) &&  i - (map.get(mod)+1)+1 >= 2) {
+            return true;
+        } else if (!map.containsKey(mod)) {
+            map.put(mod, i);
+        }
+    }
+    return false;
+}
+```
